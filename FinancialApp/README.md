@@ -1,2 +1,0 @@
-# FinancialApp
-SDP team project
