@@ -9,6 +9,8 @@ import androidx.navigation.compose.rememberNavController
 
 object Routes {
     const val HOME = "home"
+    const val SUBS = "subs"
+    const val ADD = "add"
 
 }
 
@@ -22,6 +24,12 @@ fun MainSub() {
                 HomeScreen(onOpenSubs = {
                     navController.navigate("subs")
                 })
+            }
+            composable("subs") {
+                SubscriptionScreen(navController)
+            }
+            composable("add") {
+                //AddSubscriptionScreen(navController)
             }
         }
     }
