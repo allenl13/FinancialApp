@@ -1,6 +1,5 @@
 package com.example.financialapp.Convertion
 
-import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -10,5 +9,8 @@ interface ConvertAPI {
         @Query("amount") amount: Double,
         @Query("from") from: String,
         @Query("to") to: String
-    ): Call<ConvertResponse>
+    ): ConvertResponse
+
+    @GET("v1/currencies")
+    suspend fun allCurrency(): Map<String, String>
 }

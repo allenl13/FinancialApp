@@ -57,6 +57,14 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     val retrofitVersion = "3.0.0"
-    implementation("com.squareup.retrofit2.retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+//    // OkHttp for networking
+//    implementation("com.squareup.okhttp3:okhttp:5.1.0")
+//    implementation("com.squareup.okhttp3:logging-interceptor:5.1.0")
+//    // Coroutines for async operations
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+//    // ViewModel
+//    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.3")
+//    implementation("androidx.compose.material3:material3:1.3.2")
 }
