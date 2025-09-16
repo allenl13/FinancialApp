@@ -27,7 +27,7 @@ fun HomeScreen(onOpenSubs: () -> Unit) {
             Box(modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center) {
                 Text(
-                    text = "View Subscriptions",
+                    text = "View  Subscriptions",
                     fontSize = 20.sp
                 )
             }
