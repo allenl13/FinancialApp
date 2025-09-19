@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -20,6 +23,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,10 +31,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +74,8 @@ fun AddSubscriptionScreen(navController: NavController) {
                                 )
                                 navController.popBackStack()
                             }
-                        }, colors = ButtonDefaults.buttonColors(
+                        },
+                        colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF475D92),
                             contentColor = Color.White
                         ),
@@ -89,32 +98,29 @@ fun AddSubscriptionScreen(navController: NavController) {
                 onValueChange = { name = it },
                 label = { Text("Enter Name*") },
                 modifier = Modifier.fillMaxWidth(0.9f),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFF475D92),
-                unfocusedBorderColor = Color.Gray,focusedLabelColor = Color(0xFF475D92),
-                    unfocusedLabelColor = Color.DarkGray)
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF475D92),
+                    unfocusedBorderColor = Color.Gray, focusedLabelColor = Color(0xFF475D92),
+                    unfocusedLabelColor = Color.DarkGray
+                )
             )
             OutlinedTextField(
                 value = amount,
                 onValueChange = { amount = it },
                 label = { Text("Enter Amount (eg: 9.99)*") },
                 modifier = Modifier.fillMaxWidth(0.9f),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFF475D92),
-                    unfocusedBorderColor = Color.Gray,focusedLabelColor = Color(0xFF475D92),
-                    unfocusedLabelColor = Color.DarkGray)
-            )
-            OutlinedTextField(
-                value = due,
-                onValueChange = { due = it },
-                label = { Text("Due Date (eg: DD/MM/YYYY)*") },
-                modifier = Modifier.fillMaxWidth(0.9f),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFF475D92),
-                    unfocusedBorderColor = Color.Gray,focusedLabelColor = Color(0xFF475D92),
-                    unfocusedLabelColor = Color.DarkGray)
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF475D92),
+                    unfocusedBorderColor = Color.Gray, focusedLabelColor = Color(0xFF475D92),
+                    unfocusedLabelColor = Color.DarkGray
+                )
             )
 
-            RecurringDropDown()
+            DueDate(selected = due) { due = it }
 
-            CategoryDropDown()
+            RecurringDropDown(selected = recurring) { recurring = it }
+
+            CategoryDropDown(selected = category) { category = it }
 
         }
     }
@@ -122,33 +128,110 @@ fun AddSubscriptionScreen(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecurringDropDown() {
+fun DueDate(selected: String, onSelected: (String) -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+    val dateState = rememberDatePickerState()
+    val focusManager = LocalFocusManager.current
+    val displayText: String
 
-    val list = listOf("Daily","Weekly","Monthly","Yearly")
-    var isExpanded by remember {mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf("Choose Recurrence")}
+    if (selected.isBlank()) {
+        displayText = "Choose Date"
+    } else {
+        displayText = selected
+    }
 
-    ExposedDropdownMenuBox(expanded = isExpanded,  onExpandedChange = { isExpanded = !isExpanded })
-    {
-       OutlinedTextField(
-           value = selectedText,
-           onValueChange = {},
-           readOnly = true,
-           label = { Text("Recurring")},
-           trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)},
-           modifier = Modifier.menuAnchor().fillMaxWidth(0.9f),
-           colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFF475D92),
+    OutlinedTextField(
+        value = displayText,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text("Due Date") },
+        trailingIcon = {
+            IconButton(onClick = { showDialog = true }) {
+                Icon(Icons.Filled.DateRange, null)
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .onFocusChanged {
+                if (it.isFocused) {
+                    showDialog = true
+                    focusManager.clearFocus(force = true)
+                }
+            },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color(0xFF475D92),
             unfocusedBorderColor = Color.Gray,
-               focusedLabelColor = Color(0xFF475D92),
-               unfocusedLabelColor = Color.DarkGray)
+            focusedLabelColor = Color(0xFF475D92),
+            unfocusedLabelColor = Color.DarkGray
+        )
 
-       )
-        ExposedDropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false}) {
-            list.forEachIndexed { index, text ->
+    )
+    if (showDialog) {
+        DatePickerDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val millis = dateState.selectedDateMillis
+                    if (millis != null) {
+                        val formatted =
+                            SimpleDateFormat(
+                                "dd MMM yyyy",
+                                Locale.getDefault()
+                            ).format(Date(millis))
+                        onSelected(formatted)
+                    }
+                    showDialog = false
+                }) { Text("Save") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = dateState)
+        }
+    }
+
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RecurringDropDown(selected: String, onSelected: (String) -> Unit) {
+
+    val options = listOf("day", "week", "month", "year")
+    var isExpanded by remember { mutableStateOf(false) }
+    val displayText: String
+
+    if (selected.isBlank()) {
+        displayText = "Choose Category"
+    } else {
+        displayText = selected
+    }
+    ExposedDropdownMenuBox(expanded = isExpanded, onExpandedChange = { isExpanded = !isExpanded })
+    {
+        OutlinedTextField(
+            value = displayText,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Recurring") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(0.9f),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFF475D92),
+                unfocusedBorderColor = Color.Gray,
+                focusedLabelColor = Color(0xFF475D92),
+                unfocusedLabelColor = Color.DarkGray
+            )
+
+        )
+        ExposedDropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
+            options.forEach { text ->
                 DropdownMenuItem(
-                    text = { Text(text)},
+                    text = { Text(text) },
                     onClick = {
-                        selectedText = text
+                        onSelected(text)
                         isExpanded = false
                     }
                 )
@@ -159,33 +242,50 @@ fun RecurringDropDown() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryDropDown() {
+fun CategoryDropDown(selected: String, onSelected: (String) -> Unit) {
 
-    val list = listOf("Entertainment & Media","Mobile & Internet","Utilities","Health & Wellness", "Insurance", "Other")
-    var isExpanded by remember {mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf("Choose Category")}
+    val options = listOf(
+        "Entertainment & Media",
+        "Mobile & Internet",
+        "Utilities",
+        "Health & Wellness",
+        "Insurance",
+        "Other"
+    )
+    var isExpanded by remember { mutableStateOf(false) }
+    val displayText: String
 
-    ExposedDropdownMenuBox(expanded = isExpanded,  onExpandedChange = { isExpanded = !isExpanded })
+    if (selected.isBlank()) {
+        displayText = "Choose Category"
+    } else {
+        displayText = selected
+    }
+
+    ExposedDropdownMenuBox(expanded = isExpanded, onExpandedChange = { isExpanded = !isExpanded })
     {
         OutlinedTextField(
-            value = selectedText,
+            value = displayText,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Category")},
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)},
-            modifier = Modifier.menuAnchor().fillMaxWidth(0.9f),
-            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFF475D92),
+            label = { Text("Category") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(0.9f),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFF475D92),
                 unfocusedBorderColor = Color.Gray,
                 focusedLabelColor = Color(0xFF475D92),
                 unfocusedLabelColor = Color.DarkGray
             )
+
         )
-        ExposedDropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false}) {
-            list.forEachIndexed { index, text ->
+        ExposedDropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
+            options.forEach { text ->
                 DropdownMenuItem(
-                    text = { Text(text)},
+                    text = { Text(text) },
                     onClick = {
-                        selectedText = text
+                        onSelected(text)
                         isExpanded = false
                     }
                 )
