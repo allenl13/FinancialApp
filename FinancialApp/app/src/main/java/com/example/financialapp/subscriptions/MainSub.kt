@@ -29,7 +29,7 @@ fun MainSub() {
                 SubscriptionScreen(navController)
             }
             composable("add") {
-                //AddSubscriptionScreen(navController)
+                AddSubscriptionScreen(navController)
             }
         }
     }

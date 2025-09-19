@@ -19,13 +19,21 @@ import androidx.compose.ui.unit.sp
 fun HomeScreen(onOpenSubs: () -> Unit) {
 
     Box(
-        modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp), contentAlignment = Alignment.Center
     ) {
-        Card(modifier = Modifier.size(200.dp).clickable { onOpenSubs() },
+        Card(
+            modifier = Modifier
+                .size(200.dp)
+                .clickable { onOpenSubs() },
             shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)) {
-            Box(modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center) {
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
                     text = "View  Subscriptions",
                     fontSize = 20.sp
