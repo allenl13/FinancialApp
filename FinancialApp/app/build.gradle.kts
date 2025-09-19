@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,6 +11,9 @@ android {
     namespace = "com.example.financialapp"
     compileSdk = 36
 
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         applicationId = "com.example.financialapp"
         minSdk = 24
@@ -15,7 +21,18 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        //accessing API key
+        val localProps = Properties().apply {
+            val file = rootProject.file("local.properties")
+            if (file.exists()){
+                load(FileInputStream(file))
+            }
+        }
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val alphaVantageKey: String = localProps.getProperty("ALPHA_VANTAGE_KEY") ?: ""
+        buildConfigField("String", "ALPHA_VANTAGE_KEY", "\"$alphaVantageKey\"")
     }
 
     buildTypes {

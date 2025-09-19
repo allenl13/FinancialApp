@@ -21,7 +21,8 @@ import com.example.financialapp.Conversion.ConvertViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.financialapp.Conversion.Currencies
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -315,7 +316,7 @@ fun ConvertPage(viewModel: ConvertViewModel) {
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            Text(
+                            Text( // Currency being converted
                                 text = "${result.amount} ${result.base}",
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
@@ -330,7 +331,7 @@ fun ConvertPage(viewModel: ConvertViewModel) {
                             )
                             val target = to
                             val rate: Double = result.rates.values.firstOrNull() ?: 0.0
-                            Text(
+                            Text( // Currency converted
                                 text = "${"%.2f".format(rate)} $target",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,

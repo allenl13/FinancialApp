@@ -14,12 +14,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import com.example.financialapp.Conversion.ConvertViewModel
 import com.example.financialapp.Convertion.ConvertPage
+import com.example.financialapp.Investment.InvestPage
+import com.example.financialapp.Investment.InvestViewModel
 import com.example.financialapp.ui.theme.FinancialAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         var convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
+        var investViewModel = ViewModelProvider(this)[InvestViewModel::class.java]
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
@@ -29,7 +32,12 @@ class MainActivity : ComponentActivity() {
 //                        name = "Android",
 //                        modifier = Modifier.padding(innerPadding)
 //                    )
-                    ConvertPage(convertViewModel)
+//                    ConvertPage(
+//                        convertViewModel
+//                    )
+                    InvestPage(
+                        investViewModel
+                    )
                 }
             }
         }

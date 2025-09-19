@@ -30,6 +30,7 @@ class ConvertViewModel : ViewModel() {
         loadAllCurrency()
     }
 
+    // Loading all currency available from Frankfurter API
     private fun loadAllCurrency(){
         viewModelScope.launch {
             try {
@@ -60,6 +61,7 @@ class ConvertViewModel : ViewModel() {
         return _showCurrency.value
     }
 
+    // This function converts the currency to the specified currency
     fun convertMoney(amount : Double, from: String, to: String){
         viewModelScope.launch {
             try{
