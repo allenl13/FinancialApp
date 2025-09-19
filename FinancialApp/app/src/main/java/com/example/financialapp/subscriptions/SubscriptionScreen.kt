@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -26,9 +27,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +80,11 @@ fun SubscriptionScreen(navController: NavController) {
         ) {
             Button(
                 onClick = {navController.navigate("add")},
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF475D92),
+                    contentColor = Color.White
+                )
             ) {
                 Text("Add")
             }
@@ -97,7 +104,14 @@ fun SubscriptionScreen(navController: NavController) {
 
                         ) {
                             Text(text = sub, fontSize = 20.sp)
-                            Button(onClick = { /*add manage popout*/}) {
+                            Button(
+                                onClick = { /*add manage popout*/},
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF475D92),
+                                    contentColor = Color.White
+                                )
+
+                            ) {
                                 Text("Manage")
                             }
                         }
