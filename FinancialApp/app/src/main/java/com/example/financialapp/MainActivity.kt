@@ -1,47 +1,33 @@
 package com.example.financialapp
 
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.financialapp.ui.theme.FinancialAppTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import com.example.financialapp.ui.settings.SettingsScreen
+import com.example.financialapp.ui.theme.AppThemeExt
+import com.example.financialapp.ui.theme.ThemeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            FinancialAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            val vm: ThemeViewModel = viewModel()
+            val mode by vm.mode.collectAsState()
+            val primary by vm.primaryArgb.collectAsState()
+
+            AppThemeExt(mode = mode, primaryArgb = primary) {
+                SettingsScreen(
+                    currentMode = mode,
+                    currentPrimary = primary,
+                    onChangeMode = vm::setMode,
+                    onChangeColor = vm::setPrimaryColor
+                )
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    FinancialAppTheme {
-        Greeting("Android")
-    }
-}
