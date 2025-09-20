@@ -19,7 +19,8 @@ fun SettingsScreen(
     currentMode: ThemeMode,
     currentPrimary: Long,
     onChangeMode: (ThemeMode) -> Unit,
-    onChangeColor: (Long) -> Unit
+    onChangeColor: (Long) -> Unit,
+    onExportCsv: () -> Unit
 ) {
     val swatches = listOf(0xFF6750A4, 0xFF1E88E5, 0xFF43A047, 0xFFFB8C00, 0xFFE53935, 0xFF00897B)
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -44,6 +45,7 @@ fun SettingsScreen(
         }
 
         Button(onClick = {}) { Text("Primary sample") }
+        Button(onClick = onExportCsv) { Text("Export Transactions (CSV)") }
     }
 }
 
