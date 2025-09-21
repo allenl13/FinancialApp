@@ -1,6 +1,8 @@
 package com.example.financialapp.Investment
 
 import com.example.financialapp.BuildConfig
+import com.google.gson.JsonObject
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -11,5 +13,5 @@ interface StockAPI {
         @Query("function") function: String = "TIME_SERIES_DAILY",
         @Query("symbol") symbol: String, // Name of stock
         @Query("apikey") apiKey: String = BuildConfig.ALPHA_VANTAGE_KEY
-    ): StockResponse
+    ): Response<JsonObject>
 }
