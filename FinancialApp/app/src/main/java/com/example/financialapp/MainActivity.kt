@@ -10,10 +10,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.ui.category.CategoryListScreen
+import com.example.financialapp.ui.goal.GoalDetailScreen
+import com.example.financialapp.ui.goal.GoalsListScreen
 import com.example.financialapp.ui.theme.FinancialAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,14 +32,26 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppRoot() {
     FinancialAppTheme {
+        // Sets up notification channel and (on Android 13+) requests POST_NOTIFICATIONS once.
+        EnsureNotificationsReady()
+
         val nav = rememberNavController()
         Scaffold(modifier = Modifier.fillMaxSize()) { inner ->
             NavHost(
                 navController = nav,
-                startDestination = "categories",
+                startDestination = "goals",
                 modifier = Modifier.padding(inner)
             ) {
                 composable("categories") { CategoryListScreen() }
+
+                composable("goals") { GoalsListScreen(nav) }
+
+                composable(
+                    route = "goal/{goalId}",
+                    arguments = listOf(navArgument("goalId") { type = NavType.LongType })
+                ) {
+                    GoalDetailScreen(nav)
+                }
             }
         }
     }

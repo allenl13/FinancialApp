@@ -38,6 +38,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "17"
@@ -76,4 +77,10 @@ dependencies {
     // coroutines (flows + tests)
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    // WorkManager (notifications)
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // Desugaring for java.time on API 24–25
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
