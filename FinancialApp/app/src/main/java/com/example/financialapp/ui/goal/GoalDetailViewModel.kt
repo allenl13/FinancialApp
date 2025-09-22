@@ -1,3 +1,4 @@
+// FINAL
 package com.example.financialapp.ui.goal
 
 import android.app.Application
@@ -62,7 +63,6 @@ class GoalDetailViewModel(
                 else -> dueText.toEpochDmyOrNull()
             }
 
-            // Persist updates (repo.updateAll must accept clearDue and clear when true)
             repo.updateAll(goalId, name, target, due, clearDue)
 
             // Re-read and (re)schedule notifications accordingly
@@ -74,7 +74,6 @@ class GoalDetailViewModel(
                 } else {
                     DeadlineReminderWorker.cancel(app, g.id)
                 }
-                // In case target change makes it reached already
                 NotifyGoalReachedWorker.enqueue(app, g.id)
             }
         }
@@ -95,7 +94,6 @@ class GoalDetailViewModel(
         )
     }
 
-    /** On-track if saved so far >= expected by linear pace between createdAt and dueDate. */
     private fun SavingGoal.isOnTrack(now: Long): Boolean {
         val end = dueDate ?: return true
         if (end <= createdAt) return true
@@ -106,7 +104,6 @@ class GoalDetailViewModel(
     }
 }
 
-/** Parse "DD/MM/YYYY" into epoch millis, or null if invalid. */
 private fun String.toEpochDmyOrNull(): Long? = runCatching {
     LocalDate.parse(this.trim(), DMY)
         .atStartOfDay(ZoneId.systemDefault())

@@ -1,3 +1,4 @@
+// FINAL
 package com.example.financialapp.ui.goal
 
 import android.app.Application
@@ -39,14 +40,14 @@ class GoalsListViewModel(app: Application) : AndroidViewModel(app) {
             val target = targetText.toDoubleOrNull() ?: 0.0
             val due = dueText?.toEpochDmyOrNull()
             if (name.isNotBlank() && target > 0) {
-                // repo.create returns the inserted row id (Long)
                 val id = repo.create(name.trim(), target, due, categoryId)
                 if (due != null) {
-                    // schedule a reminder ~DAYS_BEFORE the due date
                     DeadlineReminderWorker.schedule(getApplication(), id, due)
                 }
             }
         }
+
+    fun delete(id: Long) = viewModelScope.launch { repo.delete(id) }
 
     private fun SavingGoal.toUi() = GoalListItemUi(
         id = id,
@@ -58,7 +59,6 @@ class GoalsListViewModel(app: Application) : AndroidViewModel(app) {
     )
 }
 
-/** Accepts DD/MM/YYYY and returns epoch millis or null. */
 private fun String.toEpochDmyOrNull(): Long? = runCatching {
     LocalDate.parse(this.trim(), DMY)
         .atStartOfDay(ZoneId.systemDefault())
