@@ -11,27 +11,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.math.max
-import kotlin.math.min
-
 import java.time.LocalDate
 import java.time.ZoneId
 import com.example.financialapp.util.DMY
-
+import kotlin.math.min
 
 data class GoalListItemUi(
     val id: Long,
     val name: String,
     val saved: Double,
     val target: Double,
-    val progress: Float, // 0f..1f
+    val progress: Float,
     val dueDateMillis: Long?
 )
 
 class GoalsListViewModel(app: Application) : AndroidViewModel(app) {
-    private val repo by lazy {
-        SavingGoalRepository(DatabaseModule.db(app).savingGoalDao())
-    }
+    private val repo by lazy { SavingGoalRepository(DatabaseModule.db(app).savingGoalDao()) }
 
     val goals: StateFlow<List<GoalListItemUi>> =
         repo.observeAll()
@@ -42,11 +37,9 @@ class GoalsListViewModel(app: Application) : AndroidViewModel(app) {
         val target = targetText.toDoubleOrNull() ?: 0.0
         val due = dueText?.toEpochDmyOrNull()
         if (name.isNotBlank() && target > 0) {
-            repo.create(name, target, due, categoryId)
+            repo.create(name.trim(), target, due, categoryId)
         }
     }
-
-    fun delete(id: Long) = viewModelScope.launch { repo.delete(id) }
 
     private fun SavingGoal.toUi() = GoalListItemUi(
         id = id,
@@ -58,12 +51,10 @@ class GoalsListViewModel(app: Application) : AndroidViewModel(app) {
     )
 }
 
+/** Accepts DD/MM/YYYY and returns epoch millis or null. */
 private fun String.toEpochDmyOrNull(): Long? = runCatching {
-    val fmt = java.time.format.DateTimeFormatter
-        .ofPattern("dd/MM/uuuu")
-        .withResolverStyle(java.time.format.ResolverStyle.STRICT)
-    java.time.LocalDate.parse(this.trim(), fmt)
-        .atStartOfDay(java.time.ZoneId.systemDefault())
+    LocalDate.parse(this.trim(), DMY)
+        .atStartOfDay(ZoneId.systemDefault())
         .toInstant()
         .toEpochMilli()
 }.getOrNull()

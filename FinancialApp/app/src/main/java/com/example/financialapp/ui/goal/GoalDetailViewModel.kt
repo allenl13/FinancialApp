@@ -7,12 +7,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.financialapp.data.DatabaseModule
 import com.example.financialapp.data.goal.SavingGoal
 import com.example.financialapp.data.goal.SavingGoalRepository
-import kotlinx.coroutines.flow.*
+import com.example.financialapp.util.DMY
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.math.min
 import java.time.LocalDate
 import java.time.ZoneId
-import com.example.financialapp.util.DMY
+import kotlin.math.min
 
 data class GoalDetailUi(
     val id: Long,
@@ -38,15 +41,11 @@ class GoalDetailViewModel(
             .map { it?.toUi() }
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    fun updateTarget(newTargetText: String) = viewModelScope.launch {
-        newTargetText.toDoubleOrNull()?.let { repo.updateTarget(goalId, it) }
-    }
-
     fun updateSaved(newSavedText: String) = viewModelScope.launch {
         newSavedText.toDoubleOrNull()?.let { repo.updateSaved(goalId, it) }
     }
 
-    /**  Edit dialog: name, target, due (DD/MM/YYYY) with optional clear-due. */
+    /** Bulk edit from Edit dialog: name, target, due (DD/MM/YYYY) with optional clear-due. */
     fun updateAll(nameText: String, targetText: String, dueText: String?, clearDue: Boolean) =
         viewModelScope.launch {
             val name = nameText.trim().takeIf { it.isNotEmpty() }
@@ -56,7 +55,6 @@ class GoalDetailViewModel(
                 dueText.isNullOrBlank() -> null
                 else -> dueText.toEpochDmyOrNull()
             }
-            // NOTE: repository must have signature: updateAll(id, name, target, due, clearDue)
             repo.updateAll(goalId, name, target, due, clearDue)
         }
 
