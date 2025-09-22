@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Needed for Retrofit/API calls -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Networking for API calls -->
+    <uses-permission android:name="android.permission.INTERNET"/>
 
-    <!-- Android 13+ runtime permission for notifications -->
+    <!-- Runtime permission on Android 13+ for notifications -->
     <uses-permission
         android:name="android.permission.POST_NOTIFICATIONS"
         tools:targetApi="33" />
@@ -32,5 +32,4 @@
         </activity>
 
     </application>
-
 </manifest>

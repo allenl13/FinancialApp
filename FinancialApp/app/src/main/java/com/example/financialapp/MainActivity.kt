@@ -21,7 +21,7 @@ import com.example.financialapp.ui.goal.GoalDetailScreen
 import com.example.financialapp.ui.goal.GoalsListScreen
 import com.example.financialapp.ui.theme.FinancialAppTheme
 
-// Feature pages
+// Tristan's feature pages (fix package names if needed in your project)
 import com.example.financialapp.Conversion.ConvertViewModel
 import com.example.financialapp.Convertion.ConvertPage
 import com.example.financialapp.Investment.InvestPage
@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
-        val investViewModel = ViewModelProvider(this)[InvestViewModel::class.java]
+        val investViewModel  = ViewModelProvider(this)[InvestViewModel::class.java]
 
         setContent {
             AppRoot(
@@ -50,7 +50,6 @@ fun AppRoot(
     investViewModel: InvestViewModel
 ) {
     FinancialAppTheme {
-        // Notification channel + runtime request on Android 13+
         EnsureNotificationsReady()
 
         val nav = rememberNavController()
@@ -60,7 +59,6 @@ fun AppRoot(
                 startDestination = "goals",
                 modifier = Modifier.padding(inner)
             ) {
-                // Existing
                 composable("categories") { CategoryListScreen() }
                 composable("goals") { GoalsListScreen(nav) }
                 composable(
@@ -69,7 +67,7 @@ fun AppRoot(
                 ) { GoalDetailScreen(nav) }
 
                 // Feature routes
-                composable("invest") { InvestPage(investViewModel) }
+                composable("invest")  { InvestPage(investViewModel) }
                 composable("convert") { ConvertPage(convertViewModel) }
             }
         }
