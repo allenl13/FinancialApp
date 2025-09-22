@@ -7,41 +7,41 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.financialapp.ui.category.CategoryListScreen
 import com.example.financialapp.ui.theme.FinancialAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            FinancialAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+        setContent { AppRoot() }
+    }
+}
+
+@Composable
+fun AppRoot() {
+    FinancialAppTheme {
+        val nav = rememberNavController()
+        Scaffold(modifier = Modifier.fillMaxSize()) { inner ->
+            NavHost(
+                navController = nav,
+                startDestination = "categories",
+                modifier = Modifier.padding(inner)
+            ) {
+                composable("categories") { CategoryListScreen() }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    FinancialAppTheme {
-        Greeting("Android")
-    }
+private fun AppRootPreview() {
+    AppRoot()
 }
