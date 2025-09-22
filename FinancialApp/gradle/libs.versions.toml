@@ -15,6 +15,7 @@ coroutines = "1.9.0"
 ksp = "2.0.21-1.0.25"
 
 desugar = "2.1.5"
+work = "2.9.0" # WorkManager for notifications
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,16 +41,18 @@ androidx-room-runtime   = { group = "androidx.room", name = "room-runtime", vers
 androidx-room-ktx       = { group = "androidx.room", name = "room-ktx",     version.ref = "room" }
 androidx-room-compiler  = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
-# Coroutines (useful with Room/Flow + tests)
+# Coroutines
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test    = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test",    version.ref = "coroutines" }
 
+# Desugaring
 desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
+
+# WorkManager (notifications)
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-

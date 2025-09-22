@@ -78,5 +78,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.kotlinx.coroutines.test)
 
+    // WorkManager (notifications)
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // Desugaring for java.time on API 24–25
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
