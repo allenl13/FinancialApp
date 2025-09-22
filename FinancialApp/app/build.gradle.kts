@@ -78,5 +78,5 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.kotlinx.coroutines.test)
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
