@@ -21,7 +21,7 @@ import com.example.financialapp.ui.goal.GoalDetailScreen
 import com.example.financialapp.ui.goal.GoalsListScreen
 import com.example.financialapp.ui.theme.FinancialAppTheme
 
-// From Tristan's branch
+// Feature pages
 import com.example.financialapp.Conversion.ConvertViewModel
 import com.example.financialapp.Convertion.ConvertPage
 import com.example.financialapp.Investment.InvestPage
@@ -32,7 +32,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Keep Tristan's ViewModels (constructed in Activity and passed down)
         val convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
         val investViewModel = ViewModelProvider(this)[InvestViewModel::class.java]
 
@@ -51,7 +50,7 @@ fun AppRoot(
     investViewModel: InvestViewModel
 ) {
     FinancialAppTheme {
-        // Sets up notification channel and (on Android 13+) requests POST_NOTIFICATIONS once.
+        // Notification channel + runtime request on Android 13+
         EnsureNotificationsReady()
 
         val nav = rememberNavController()
@@ -61,17 +60,15 @@ fun AppRoot(
                 startDestination = "goals",
                 modifier = Modifier.padding(inner)
             ) {
-                // Existing destinations from main
+                // Existing
                 composable("categories") { CategoryListScreen() }
                 composable("goals") { GoalsListScreen(nav) }
                 composable(
                     route = "goal/{goalId}",
                     arguments = listOf(navArgument("goalId") { type = NavType.LongType })
-                ) {
-                    GoalDetailScreen(nav)
-                }
+                ) { GoalDetailScreen(nav) }
 
-                // New destinations from Tristan's work
+                // Feature routes
                 composable("invest") { InvestPage(investViewModel) }
                 composable("convert") { ConvertPage(convertViewModel) }
             }

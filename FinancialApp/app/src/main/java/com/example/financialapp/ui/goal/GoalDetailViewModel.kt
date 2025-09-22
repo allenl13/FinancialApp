@@ -7,17 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.financialapp.data.DatabaseModule
 import com.example.financialapp.data.goal.SavingGoal
 import com.example.financialapp.data.goal.SavingGoalRepository
-import com.example.financialapp.util.DMY
-import com.example.financialapp.work.DeadlineReminderWorker
-import com.example.financialapp.work.NotifyGoalReachedWorker
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.math.min
 import java.time.LocalDate
 import java.time.ZoneId
-import kotlin.math.min
+import com.example.financialapp.util.DMY
 
 data class GoalDetailUi(
     val id: Long,
@@ -43,16 +38,15 @@ class GoalDetailViewModel(
             .map { it?.toUi() }
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    /** Quick edit of saved amount; also checks if the goal is now reached. */
-    fun updateSaved(newSavedText: String) = viewModelScope.launch {
-        newSavedText.toDoubleOrNull()?.let { amount ->
-            repo.updateSaved(goalId, amount)
-            // If reached (or becomes reached), show a congrats notification
-            NotifyGoalReachedWorker.enqueue(getApplication(), goalId)
-        }
+    fun updateTarget(newTargetText: String) = viewModelScope.launch {
+        newTargetText.toDoubleOrNull()?.let { repo.updateTarget(goalId, it) }
     }
 
-    /** Bulk edit from Edit dialog: name, target, due (DD/MM/YYYY) with optional clear-due. */
+    fun updateSaved(newSavedText: String) = viewModelScope.launch {
+        newSavedText.toDoubleOrNull()?.let { repo.updateSaved(goalId, it) }
+    }
+
+    /**  Edit dialog: name, target, due (DD/MM/YYYY) with optional clear-due. */
     fun updateAll(nameText: String, targetText: String, dueText: String?, clearDue: Boolean) =
         viewModelScope.launch {
             val name = nameText.trim().takeIf { it.isNotEmpty() }
@@ -62,22 +56,8 @@ class GoalDetailViewModel(
                 dueText.isNullOrBlank() -> null
                 else -> dueText.toEpochDmyOrNull()
             }
-
-            // Persist updates (repo.updateAll must accept clearDue and handle null due as 'clear')
+            // NOTE: repository must have signature: updateAll(id, name, target, due, clearDue)
             repo.updateAll(goalId, name, target, due, clearDue)
-
-            // Re-read and (re)schedule notifications accordingly
-            val app = getApplication<Application>()
-            val updated = DatabaseModule.db(app).savingGoalDao().getById(goalId)
-            updated?.let { g ->
-                if (g.dueDate != null) {
-                    DeadlineReminderWorker.schedule(app, g.id, g.dueDate!!)
-                } else {
-                    DeadlineReminderWorker.cancel(app, g.id)
-                }
-                // In case target changed or saved already meets target
-                NotifyGoalReachedWorker.enqueue(app, g.id)
-            }
         }
 
     fun delete() = viewModelScope.launch { repo.delete(goalId) }
