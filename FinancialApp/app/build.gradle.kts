@@ -27,7 +27,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // BuildConfig API key from local.properties (safe fallback to "")
+        // BuildConfig: Alpha Vantage API key from local.properties (falls back to "")
         val localProps = Properties().apply {
             val file = rootProject.file("local.properties")
             if (file.exists()) load(FileInputStream(file))
@@ -88,7 +88,7 @@ dependencies {
     // Desugaring for java.time on API 24–25
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    // Retrofit (kept from feature work)
+    // Retrofit (from your feature work)
     val retrofitVersion = "3.0.0"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
