@@ -35,7 +35,7 @@ fun HomeScreen(onOpenSubs: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "View  Subscriptions",
+                    text = "Subscriptions",
                     fontSize = 20.sp
                 )
             }

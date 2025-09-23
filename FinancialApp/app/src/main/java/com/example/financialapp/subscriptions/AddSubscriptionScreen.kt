@@ -1,6 +1,5 @@
 package com.example.financialapp.subscriptions
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -67,7 +66,12 @@ fun AddSubscriptionScreen(navController: NavController) {
                     TextButton(
                         onClick = {
                             if (name.isNotBlank() && due.isNotBlank() && amount.isNotBlank()) {
-                                val result = "$name\nDue: $due\n$$amount / $recurring"
+                                val result = buildString {
+                                    appendLine(name)
+                                    appendLine("Due: $due")
+                                    appendLine("$$amount / $recurring")
+                                    append("Category: $category")
+                                }
                                 navController.previousBackStackEntry?.savedStateHandle?.set(
                                     "newSub",
                                     result
@@ -203,7 +207,7 @@ fun RecurringDropDown(selected: String, onSelected: (String) -> Unit) {
     val displayText: String
 
     if (selected.isBlank()) {
-        displayText = "Choose Category"
+        displayText = "Choose Occurence"
     } else {
         displayText = selected
     }
@@ -245,10 +249,10 @@ fun RecurringDropDown(selected: String, onSelected: (String) -> Unit) {
 fun CategoryDropDown(selected: String, onSelected: (String) -> Unit) {
 
     val options = listOf(
-        "Entertainment & Media",
-        "Mobile & Internet",
+        "Entertainment",
+        "Software & Apps",
         "Utilities",
-        "Health & Wellness",
+        "Fitness & Health",
         "Insurance",
         "Other"
     )

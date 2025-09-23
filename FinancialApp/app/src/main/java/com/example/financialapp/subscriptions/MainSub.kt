@@ -6,6 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.financialapp.subscriptions.Routes.ADD
+import com.example.financialapp.subscriptions.Routes.HOME
+import com.example.financialapp.subscriptions.Routes.SUBS
 
 object Routes {
     const val HOME = "home"
@@ -19,16 +22,16 @@ fun MainSub() {
     val navController = rememberNavController()
 
     Surface(color = MaterialTheme.colorScheme.background) {
-        NavHost(navController = navController, startDestination = "home") {
-            composable("home") {
+        NavHost(navController = navController, startDestination = HOME) {
+            composable(HOME) {
                 HomeScreen(onOpenSubs = {
-                    navController.navigate("subs")
+                    navController.navigate(SUBS)
                 })
             }
-            composable("subs") {
+            composable(SUBS) {
                 SubscriptionScreen(navController)
             }
-            composable("add") {
+            composable(ADD) {
                 AddSubscriptionScreen(navController)
             }
         }
