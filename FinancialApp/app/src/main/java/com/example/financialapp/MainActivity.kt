@@ -9,28 +9,47 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.lifecycle.ViewModelProvider
 import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.ui.category.CategoryListScreen
 import com.example.financialapp.ui.goal.GoalDetailScreen
 import com.example.financialapp.ui.goal.GoalsListScreen
 import com.example.financialapp.ui.theme.FinancialAppTheme
 
+// From Tristan's branch
+import com.example.financialapp.Conversion.ConvertViewModel
+import com.example.financialapp.Convertion.ConvertPage
+import com.example.financialapp.Investment.InvestPage
+import com.example.financialapp.Investment.InvestViewModel
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent { AppRoot() }
+
+        // Keep Tristan's ViewModels (constructed in Activity and passed down)
+        val convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
+        val investViewModel = ViewModelProvider(this)[InvestViewModel::class.java]
+
+        setContent {
+            AppRoot(
+                convertViewModel = convertViewModel,
+                investViewModel = investViewModel
+            )
+        }
     }
 }
 
 @Composable
-fun AppRoot() {
+fun AppRoot(
+    convertViewModel: ConvertViewModel,
+    investViewModel: InvestViewModel
+) {
     FinancialAppTheme {
         // Sets up notification channel and (on Android 13+) requests POST_NOTIFICATIONS once.
         EnsureNotificationsReady()
@@ -42,23 +61,20 @@ fun AppRoot() {
                 startDestination = "goals",
                 modifier = Modifier.padding(inner)
             ) {
+                // Existing destinations from main
                 composable("categories") { CategoryListScreen() }
-
                 composable("goals") { GoalsListScreen(nav) }
-
                 composable(
                     route = "goal/{goalId}",
                     arguments = listOf(navArgument("goalId") { type = NavType.LongType })
                 ) {
                     GoalDetailScreen(nav)
                 }
+
+                // New destinations from Tristan's work
+                composable("invest") { InvestPage(investViewModel) }
+                composable("convert") { ConvertPage(convertViewModel) }
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AppRootPreview() {
-    AppRoot()
 }

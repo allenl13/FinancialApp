@@ -9,13 +9,13 @@ lifecycleRuntimeKtx = "2.9.3"
 activityCompose = "1.10.1"
 composeBom = "2024.09.00"
 
+# From main (keep these)
 navigationCompose = "2.8.0"
 room = "2.6.1"
 coroutines = "1.9.0"
 ksp = "2.0.21-1.0.25"
-
 desugar = "2.1.5"
-work = "2.9.0" # WorkManager for notifications
+work = "2.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
