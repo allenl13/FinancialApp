@@ -1,3 +1,5 @@
+// FinancialApp/app/build.gradle.kts  (merged)
+
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -5,15 +7,19 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp) // from main
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.incremental", "true")
+    arg("room.generateKotlin", "true")
 }
 
 android {
     namespace = "com.example.financialapp"
     compileSdk = 36
 
-    buildFeatures {
-        buildConfig = true
-    }
     defaultConfig {
         applicationId = "com.example.financialapp"
         minSdk = 24
@@ -21,16 +27,15 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        //accessing API key
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Tristan: read API key from local.properties -> BuildConfig
         val localProps = Properties().apply {
             val file = rootProject.file("local.properties")
-            if (file.exists()){
+            if (file.exists()) {
                 load(FileInputStream(file))
             }
         }
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
         val alphaVantageKey: String = localProps.getProperty("ALPHA_VANTAGE_KEY") ?: ""
         buildConfigField("String", "ALPHA_VANTAGE_KEY", "\"$alphaVantageKey\"")
     }
@@ -44,20 +49,24 @@ android {
             )
         }
     }
+
+    // Use Java 17 + desugaring (from main)
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
+
     buildFeatures {
-        compose = true
+        compose = true            // from both
+        buildConfig = true        // from Tristan (needed for BuildConfig.*
     }
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -66,6 +75,30 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    // Navigation (main)
+    implementation(libs.androidx.navigation.compose)
+
+    // Room (main)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Coroutines (main)
+    implementation(libs.kotlinx.coroutines.android)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // WorkManager (main)
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // Desugaring for java.time on API 24–25 (main)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    // Retrofit (Tristan)
+    val retrofitVersion = "3.0.0"
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -73,15 +106,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    val retrofitVersion = "3.0.0"
-    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
-    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
-//    // OkHttp for networking
-//    implementation("com.squareup.okhttp3:okhttp:5.1.0")
-//    implementation("com.squareup.okhttp3:logging-interceptor:5.1.0")
-//    // Coroutines for async operations
-//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
-//    // ViewModel
-//    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.3")
-//    implementation("androidx.compose.material3:material3:1.3.2")
 }
