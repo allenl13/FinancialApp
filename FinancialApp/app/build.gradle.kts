@@ -104,6 +104,8 @@ dependencies {
 
     // UI constraint (Tristan)
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
+    // For navigation (Tristan)
+    implementation("androidx.navigation:navigation-compose:2.8.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

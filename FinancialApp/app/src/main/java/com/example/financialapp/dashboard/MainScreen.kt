@@ -24,39 +24,54 @@ fun MainScreenPreview(){
         ExpenseDomain("PB Tech", 4000.00, "cinema", "28 sept 2025 2:06"),
         ExpenseDomain("KFC", 5000.00, "mcdonald", "29 sept 2025 2:06"),
         )
-    MainScreen(expenses = expenses)
+    MainScreen(
+        expenses = expenses,
+        onConvertClick = {},
+        onInvestClick = {},
+        onSubsClick = {},
+        onGoalsClick = {}
+    )
 }
 
 @Composable
 fun MainScreen(
     onCardClick: () -> Unit = { },
-    expenses: List<ExpenseDomain>
-){
+    expenses: List<ExpenseDomain>,
+    onConvertClick: () -> Unit,
+    onInvestClick: () -> Unit,
+    onSubsClick: () -> Unit,
+    onGoalsClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        LazyColumn (
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 70.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
-        ){
-            item {
-                Header()
-            }
+        ) {
+            item { Header() }
+
             item {
                 UserCard(onClick = onCardClick)
             }
+
             item {
-                ButtonRow()
+                ButtonRow(
+                    onConvertClick = onConvertClick,
+                    onInvestClick = onInvestClick,
+                    onSubsClick = onSubsClick,
+                    onGoalsClick = onGoalsClick
+                )
             }
 
             items(
                 items = expenses
-            ){
-                item -> ExpenseList(item)
+            ) { item ->
+                ExpenseList(item)
             }
         }
     }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,42 +27,46 @@ import androidx.compose.ui.unit.sp
 import com.example.financialapp.R
 
 @Composable
-@Preview
-fun ButtonRow(){
-    Row (
+//@Preview
+fun ButtonRow(
+    onConvertClick: () -> Unit,
+    onInvestClick: () -> Unit,
+    onSubsClick: () -> Unit,
+    onGoalsClick: () -> Unit
+) {
+
+    // icon grid row
+    Row(
         modifier = Modifier
-            .padding(vertical = 16.dp)
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ){
-        ButtonRow(R.drawable.wallet, text = "Saving Goal")
-        ButtonRow(R.drawable.btn_2, text = "Conversion Rate")
-        ButtonRow(R.drawable.btn_1, text = "Subscription")
-        ButtonRow(R.drawable.trade, text = "Portfolio")
-
-
+    ) {
+        ButtonItem(R.drawable.wallet, "Saving Goal", onClick = onGoalsClick)
+        ButtonItem(R.drawable.btn_2, "Conversion Rate", onClick = onConvertClick)
+        ButtonItem(R.drawable.btn_1, "Subscription", onClick = onSubsClick)
+        ButtonItem(R.drawable.trade, "Portfolio", onClick = onInvestClick)
     }
 }
 
 @Composable
-fun RowScope.ButtonRow(icon: Int, text: String){
+fun RowScope.ButtonItem(
+    icon: Int,
+    text: String,
+    onClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .weight(1f)
             .height(78.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(colorResource(R.color.teal_200))
-            .clickable{}
+            .clickable { onClick() }
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Image(
-            painter = painterResource(id = icon),
-            contentDescription = null,
-            modifier = Modifier.size(32.dp)
-        )
+        Image(painter = painterResource(icon), contentDescription = null, modifier = Modifier.size(32.dp))
         Text(
             text = text,
             color = colorResource(R.color.purple_500),
