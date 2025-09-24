@@ -43,11 +43,10 @@ class GoalDetailViewModel(
             .map { it?.toUi() }
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    /** Quick edit of saved amount; also checks if the goal is now reached. */
-    fun updateSaved(newSavedText: String) = viewModelScope.launch {
-        newSavedText.toDoubleOrNull()?.let { amount ->
-            repo.updateSaved(goalId, amount)
-            // If reached (or becomes reached), show a congrats notification
+    /** Add to saved amount (accumulate), then check if goal reached to notify. */
+    fun addSaving(deltaText: String) = viewModelScope.launch {
+        deltaText.toDoubleOrNull()?.takeIf { it > 0 }?.let { delta ->
+            repo.addSaving(goalId, delta)
             NotifyGoalReachedWorker.enqueue(getApplication(), goalId)
         }
     }
@@ -63,19 +62,15 @@ class GoalDetailViewModel(
                 else -> dueText.toEpochDmyOrNull()
             }
 
-            // Persist updates (repo.updateAll must accept clearDue and handle null due as 'clear')
             repo.updateAll(goalId, name, target, due, clearDue)
 
-            // Re-read and (re)schedule notifications accordingly
+            // Reschedule/cancel deadline reminder and re-check reached
             val app = getApplication<Application>()
             val updated = DatabaseModule.db(app).savingGoalDao().getById(goalId)
             updated?.let { g ->
-                if (g.dueDate != null) {
-                    DeadlineReminderWorker.schedule(app, g.id, g.dueDate!!)
-                } else {
-                    DeadlineReminderWorker.cancel(app, g.id)
-                }
-                // In case target changed or saved already meets target
+                g.dueDate?.let { d ->
+                    DeadlineReminderWorker.schedule(app, g.id, d)
+                } ?: DeadlineReminderWorker.cancel(app, g.id)
                 NotifyGoalReachedWorker.enqueue(app, g.id)
             }
         }
@@ -96,7 +91,6 @@ class GoalDetailViewModel(
         )
     }
 
-    /** On-track if saved so far >= expected by linear pace between createdAt and dueDate. */
     private fun SavingGoal.isOnTrack(now: Long): Boolean {
         val end = dueDate ?: return true
         if (end <= createdAt) return true
@@ -107,7 +101,6 @@ class GoalDetailViewModel(
     }
 }
 
-/** Parse "DD/MM/YYYY" into epoch millis, or null if invalid. */
 private fun String.toEpochDmyOrNull(): Long? = runCatching {
     LocalDate.parse(this.trim(), DMY)
         .atStartOfDay(ZoneId.systemDefault())
