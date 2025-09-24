@@ -1,4 +1,4 @@
-package com.example.financialapp.homepage
+package com.example.financialapp.repo
 
 import java.io.Serializable
 
