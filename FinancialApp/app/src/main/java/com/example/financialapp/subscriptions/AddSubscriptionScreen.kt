@@ -217,7 +217,7 @@ fun RecurringDropDown(selected: String, onSelected: (String) -> Unit) {
     val displayText: String
 
     if (selected.isBlank()) {
-        displayText = "Choose Occurence"
+        displayText = "Choose Billing Cycle"
     } else {
         displayText = selected
     }
@@ -227,7 +227,7 @@ fun RecurringDropDown(selected: String, onSelected: (String) -> Unit) {
             value = displayText,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Recurring") },
+            label = { Text("Billing Cycle") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
             modifier = Modifier
                 .menuAnchor()
