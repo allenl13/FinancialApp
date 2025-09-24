@@ -1,5 +1,9 @@
 package com.example.financialapp.subscriptions
 
+/*
+* This manages the screen when you press 'add'
+*/
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,14 +38,16 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddSubscriptionScreen(navController: NavController) {
+fun AddSubscriptionScreen(navController: NavController, vm: SubViewModel = viewModel()) {
     var name by remember { mutableStateOf("") }
     var due by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
@@ -66,15 +72,19 @@ fun AddSubscriptionScreen(navController: NavController) {
                     TextButton(
                         onClick = {
                             if (name.isNotBlank() && due.isNotBlank() && amount.isNotBlank()) {
-                                val result = buildString {
-                                    appendLine(name)
-                                    appendLine("Due: $due")
-                                    appendLine("$$amount / $recurring")
-                                    append("Category: $category")
-                                }
-                                navController.previousBackStackEntry?.savedStateHandle?.set(
-                                    "newSub",
-                                    result
+
+                                val formatAmount =
+                                    amount.replace(",", ".").toDoubleOrNull()
+                                        ?.let { (it * 100).roundToInt() }
+                                        ?: 0
+                                vm.insert(
+                                    SubEntity(
+                                        name = name.ifBlank { "Unknown" },
+                                        amount = formatAmount,
+                                        dueDate = due.ifBlank { "N/A" },
+                                        recurrence = recurring.ifBlank { "Monthly" },
+                                        category = category.ifBlank { "Other" }
+                                    )
                                 )
                                 navController.popBackStack()
                             }
