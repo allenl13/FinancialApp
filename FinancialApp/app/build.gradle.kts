@@ -82,6 +82,9 @@ dependencies {
     // Room (main)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
     ksp(libs.androidx.room.compiler)
 
     // Coroutines (main)
@@ -98,6 +101,9 @@ dependencies {
     val retrofitVersion = "3.0.0"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+
+    // UI constraint (Tristan)
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

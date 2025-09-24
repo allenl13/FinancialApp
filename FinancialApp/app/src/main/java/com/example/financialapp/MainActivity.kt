@@ -22,10 +22,10 @@ import com.example.financialapp.ui.goal.GoalsListScreen
 import com.example.financialapp.ui.theme.FinancialAppTheme
 
 // From Tristan's branch
-import com.example.financialapp.Conversion.ConvertViewModel
-import com.example.financialapp.Convertion.ConvertPage
-import com.example.financialapp.Investment.InvestPage
-import com.example.financialapp.Investment.InvestViewModel
+import com.example.financialapp.convertpage.ConvertViewModel
+import com.example.financialapp.convertpage.ConvertPage
+import com.example.financialapp.investmentpage.InvestPage
+import com.example.financialapp.investmentpage.InvestViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
