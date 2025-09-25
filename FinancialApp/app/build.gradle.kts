@@ -98,6 +98,9 @@ dependencies {
     //firebase auth/firestore
     implementation(libs.androidx.compose.runtime.livedata)
 
+    //ai
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
     // CSV export (ONLY if code imports one of these)
     // implementation(libs.opencsv)
     // implementation(libs.commons-csv)
