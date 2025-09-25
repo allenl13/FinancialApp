@@ -27,6 +27,7 @@ import com.example.financialapp.Convertion.ConvertPage
 import com.example.financialapp.Investment.InvestPage
 import com.example.financialapp.Investment.InvestViewModel
 import com.example.financialapp.notifications.EnsureNotificationsReady
+import com.example.financialapp.subscriptions.MainSub
 import com.example.financialapp.ui.category.CategoryListScreen
 import com.example.financialapp.ui.goal.GoalDetailScreen
 import com.example.financialapp.ui.goal.GoalsListScreen
@@ -90,9 +91,10 @@ fun AppRoot(
         Scaffold(modifier = Modifier.fillMaxSize()) { inner ->
             NavHost(
                 navController = nav,
-                startDestination = "home",
+                startDestination = "sub",
                 modifier = Modifier.padding(inner)
             ) {
+                composable ("sub"){ MainSub() }
                 // Existing
                 composable("categories") { CategoryListScreen() }
                 composable("goals") { GoalsListScreen(nav) }
