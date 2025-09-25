@@ -1,12 +1,11 @@
-import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    // Use the version-catalog managed KSP & Google Services plugins
     alias(libs.plugins.ksp)
-    // Keep the Login version:
     alias(libs.plugins.google.gms.google.services)
 }
 
@@ -26,15 +25,16 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // BuildConfig: Alpha Vantage API key from local.properties (fallback "")
-        val localProps = Properties().apply {
-            val file = rootProject.file("local.properties")
-            if (file.exists()) load(FileInputStream(file))
+        // --- BuildConfig fields (from local.properties) ---
+        val props = Properties().apply {
+            val f = rootProject.file("local.properties")
+            if (f.exists()) load(f.inputStream())
         }
-        val alphaVantageKey: String = localProps.getProperty("ALPHA_VANTAGE_KEY") ?: ""
-        buildConfigField("String", "ALPHA_VANTAGE_KEY", "\"$alphaVantageKey\"")
+        val alphaKey = props.getProperty("ALPHA_VANTAGE_KEY") ?: ""
+        buildConfigField("String", "ALPHA_VANTAGE_KEY", "\"$alphaKey\"")
     }
 
     buildTypes {
@@ -47,17 +47,17 @@ android {
         }
     }
 
-    // Java 17 + desugaring
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true
-    }
-    kotlinOptions { jvmTarget = "17" }
-
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
 
@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
@@ -73,6 +74,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.runtime.livedata)
+
     // --- Room + KSP ---
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
@@ -98,15 +100,10 @@ dependencies {
     // --- Desugaring for java.time on API 24–25 ---
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    // --- Networking: Retrofit 3.x ---
-    val retrofitVersion = "3.0.0"
-    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
-    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
-
-    // ConstraintLayout for Compose (stable)
+    // ConstraintLayout for Compose
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.0")
 
-    // --- AI (keep from Login) ---
+    // --- AI (kept from Login) ---
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
     // --- Tests ---
@@ -115,6 +112,11 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    val retrofitVersion = "3.0.0"
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
 }
