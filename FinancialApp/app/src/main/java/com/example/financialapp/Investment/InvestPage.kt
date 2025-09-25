@@ -38,11 +38,12 @@ fun InvestPage(viewModel: InvestViewModel) {
     var numOfShares by remember { mutableStateOf("") }
     var buyPrice by remember { mutableStateOf("") }
 
+    // Refresh quotes for all symbols (Alpha Vantage ~5 calls/min -> 12s per call safe;
     LaunchedEffect(portfolio) {
         val symbols = portfolio.map { it.nameInvest }.distinct()
         for (s in symbols) {
             viewModel.refreshQuote(s)
-            delay(1500) // Alpha Vantage 5 calls/min
+            delay(1500) // throttle
         }
     }
 
@@ -60,7 +61,6 @@ fun InvestPage(viewModel: InvestViewModel) {
             modifier = Modifier.padding(vertical = 24.dp)
         )
 
-        // stores information about invested stock
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,12 +71,12 @@ fun InvestPage(viewModel: InvestViewModel) {
                 Text("My Portfolio", style = MaterialTheme.typography.headlineMedium)
             }
 
-            // List holdings
+            // Holdings list
             items(portfolio) { inv ->
                 Text("${inv.shares} shares of ${inv.nameInvest} @ ${inv.price}")
             }
 
-            // Stock name input card
+            // Stock symbol
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -92,7 +92,7 @@ fun InvestPage(viewModel: InvestViewModel) {
                         )
                         OutlinedTextField(
                             value = symbol,
-                            onValueChange = { symbol = it },
+                            onValueChange = { symbol = it.uppercase() },
                             label = { Text("Stock name / symbol (e.g., AAPL)") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                             modifier = Modifier.fillMaxWidth(),
@@ -102,7 +102,7 @@ fun InvestPage(viewModel: InvestViewModel) {
                 }
             }
 
-            // Amount of shares input card
+            // Shares
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -127,7 +127,7 @@ fun InvestPage(viewModel: InvestViewModel) {
                 }
             }
 
-            // Buy price input card
+            // Buy price
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -151,13 +151,15 @@ fun InvestPage(viewModel: InvestViewModel) {
                     }
                 }
             }
+
+            // Add button
             item {
                 Button(
                     onClick = {
                         val q = numOfShares.toDoubleOrNull()
                         val p = buyPrice.toDoubleOrNull()
                         if (symbol.isNotBlank() && q != null && q > 0 && p != null && p >= 0.0) {
-                            viewModel.addInvest(symbol, q, p)
+                            viewModel.addInvest(symbol.trim(), q, p)
                             symbol = ""; numOfShares = ""; buyPrice = ""
                         }
                     },
@@ -165,8 +167,12 @@ fun InvestPage(viewModel: InvestViewModel) {
                         .fillMaxWidth()
                         .padding(vertical = 16.dp)
                         .height(50.dp)
-                ) { Text("Add investment") }
+                ) {
+                    Text("Add investment")
+                }
             }
+
+            // Totals
             item {
                 Text("Cost basis: $${"%.2f".format(viewModel.cBasis())}")
                 Text("Market value: $${"%.2f".format(viewModel.marktValue())}")

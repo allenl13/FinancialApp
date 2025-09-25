@@ -1,5 +1,3 @@
-// FinancialApp/app/build.gradle.kts  (merged)
-
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -7,7 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp) // from main
+    alias(libs.plugins.ksp)
 }
 
 ksp {
@@ -26,15 +24,12 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Tristan: read API key from local.properties -> BuildConfig
+        // BuildConfig: Alpha Vantage API key from local.properties (fallback "")
         val localProps = Properties().apply {
             val file = rootProject.file("local.properties")
-            if (file.exists()) {
-                load(FileInputStream(file))
-            }
+            if (file.exists()) load(FileInputStream(file))
         }
         val alphaVantageKey: String = localProps.getProperty("ALPHA_VANTAGE_KEY") ?: ""
         buildConfigField("String", "ALPHA_VANTAGE_KEY", "\"$alphaVantageKey\"")
@@ -50,23 +45,22 @@ android {
         }
     }
 
-    // Use Java 17 + desugaring (from main)
+    // Java 17 + desugaring
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+    kotlinOptions { jvmTarget = "17" }
 
     buildFeatures {
-        compose = true            // from both
-        buildConfig = true        // from Tristan (needed for BuildConfig.*
+        compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
+    // Core + Compose
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -76,37 +70,38 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    // Navigation (main)
+    // Navigation (from version catalog)
     implementation(libs.androidx.navigation.compose)
 
-    // Room (main)
+    // Room + KSP
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Using AppCompat / Material Views / Activity KTX:
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
-    ksp(libs.androidx.room.compiler)
 
-    // Coroutines (main)
+    // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.kotlinx.coroutines.test)
 
-    // WorkManager (main)
+    // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
 
-    // Desugaring for java.time on API 24–25 (main)
+    // Desugaring for java.time on API 24–25
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    // Retrofit (Tristan)
+    // Retrofit 3.x (binary-compatible with 2.x)
     val retrofitVersion = "3.0.0"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
 
-    // UI constraint (Tristan)
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
-    // For navigation (Tristan)
-    implementation("androidx.navigation:navigation-compose:2.8.0")
+    // ConstraintLayout for Compose (stable)
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.0")
 
+    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

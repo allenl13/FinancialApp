@@ -103,16 +103,17 @@ fun GoalDetailScreen(
 
                 HorizontalDivider()
 
-                // Quick edit ONLY for saved amount (target/name/due via menu → Edit dialog)
-                var newSaved by remember { mutableStateOf("") }
+                // Quick action: ADD saving (accumulates)
+                var addAmount by remember { mutableStateOf("") }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
-                        value = newSaved, onValueChange = { newSaved = it },
-                        label = { Text("Edit saved") },
+                        value = addAmount,
+                        onValueChange = { addAmount = it },
+                        label = { Text("Add saving") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
-                    Button(onClick = { vm.updateSaved(newSaved); newSaved = "" }) { Text("Update") }
+                    Button(onClick = { vm.addSaving(addAmount); addAmount = "" }) { Text("Add") }
                 }
             }
         }

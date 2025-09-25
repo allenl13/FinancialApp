@@ -7,11 +7,12 @@ object RetrofitInstance {
 
     private const val baseUrl = "https://api.frankfurter.dev/"
 
-    private fun getInstance() : Retrofit{
+    private fun getInstance(): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-    val convertAPI : ConvertAPI = getInstance().create(ConvertAPI::class.java)
+
+    val convertAPI: ConvertAPI = getInstance().create(ConvertAPI::class.java)
 }
