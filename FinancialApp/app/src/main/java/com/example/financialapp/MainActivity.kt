@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
 
 /// keeping this incase needed can delete if not needed
 
-// Keep Tristan's ViewModels (constructed in Activity and passed down)
+// Tristan's ViewModels (constructed in Activity and passed down)
 //        val convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
 //        val investViewModel = ViewModelProvider(this)[InvestViewModel::class.java]
 //
