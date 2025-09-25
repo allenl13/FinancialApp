@@ -1,15 +1,9 @@
-package com.example.financialapp.dashboard
+package com.example.financialapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -19,18 +13,17 @@ import androidx.navigation.navArgument
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.financialapp.notifications.EnsureNotificationsReady
-import com.example.financialapp.ui.category.CategoryListScreen
 import com.example.financialapp.ui.goal.GoalDetailScreen
 import com.example.financialapp.ui.goal.GoalsListScreen
 import com.example.financialapp.ui.theme.FinancialAppTheme
 
 // From Tristan's branch
-import com.example.financialapp.convertpage.ConvertViewModel
-import com.example.financialapp.convertpage.ConvertPage
-import com.example.financialapp.investmentpage.InvestPage
-import com.example.financialapp.investmentpage.InvestVMFactory
-import com.example.financialapp.investmentpage.InvestViewModel
-import com.example.financialapp.repo.ExpenseDomain
+import com.example.financialapp.Conversion.ConvertViewModel
+import com.example.financialapp.Conversion.ConvertPage
+import com.example.financialapp.Investment.InvestPage
+import com.example.financialapp.Investment.InvestVMFactory
+import com.example.financialapp.Investment.InvestViewModel
+import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.repo.MainViewModel
 
 class MainActivity : ComponentActivity() {
@@ -96,7 +89,7 @@ class MainActivity : ComponentActivity() {
 
 /// keeping this incase needed can delete if not needed
 
-        // Keep Tristan's ViewModels (constructed in Activity and passed down)
+// Keep Tristan's ViewModels (constructed in Activity and passed down)
 //        val convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
 //        val investViewModel = ViewModelProvider(this)[InvestViewModel::class.java]
 //
@@ -142,4 +135,3 @@ class MainActivity : ComponentActivity() {
 //        }
 //    }
 //}
-

@@ -1,4 +1,4 @@
-package com.example.financialapp.investmentpage
+package com.example.financialapp.Investment
 
 data class Investments (
     val nameInvest: String, //Name of stock "ie GOOGL"

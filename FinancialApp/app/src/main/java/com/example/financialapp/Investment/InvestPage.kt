@@ -1,4 +1,4 @@
-package com.example.financialapp.investmentpage
+package com.example.financialapp.Investment
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

@@ -1,4 +1,4 @@
-package com.example.financialapp.investmentpage
+package com.example.financialapp.Investment
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

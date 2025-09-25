@@ -1,4 +1,4 @@
-package com.example.financialapp.investmentpage
+package com.example.financialapp.Investment
 
 import com.example.financialapp.BuildConfig
 import com.google.gson.JsonObject

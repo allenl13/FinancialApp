@@ -1,4 +1,4 @@
-package com.example.financialapp.convertpage
+package com.example.financialapp.Conversion
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

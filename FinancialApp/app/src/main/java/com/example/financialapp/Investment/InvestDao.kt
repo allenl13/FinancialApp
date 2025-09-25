@@ -1,4 +1,4 @@
-package com.example.financialapp.investmentpage
+package com.example.financialapp.Investment
 
 import androidx.room.Dao
 import androidx.room.Delete

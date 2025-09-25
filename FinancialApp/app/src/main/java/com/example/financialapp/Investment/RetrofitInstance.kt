@@ -1,11 +1,11 @@
-package com.example.financialapp.convertpage
+package com.example.financialapp.Investment
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
 
-    private const val baseUrl = "https://api.frankfurter.dev/"
+    private const val baseUrl = "https://www.alphavantage.co/"
 
     private fun getInstance() : Retrofit{
         return Retrofit.Builder()
@@ -13,5 +13,5 @@ object RetrofitInstance {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-    val convertAPI : ConvertAPI = getInstance().create(ConvertAPI::class.java)
+    val  stockAPI:  StockAPI= getInstance().create(StockAPI::class.java)
 }

@@ -1,4 +1,4 @@
-package com.example.financialapp.investmentpage
+package com.example.financialapp.Investment
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

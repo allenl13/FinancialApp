@@ -1,4 +1,4 @@
-package com.example.financialapp.convertpage
+package com.example.financialapp.Conversion
 
 data class Currencies(
     val code: String,
