@@ -6,7 +6,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.google.services)
+    // Keep the Login version:
+    alias(libs.plugins.google.gms.google.services)
 }
 
 ksp {
@@ -71,8 +72,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
-
-    // Compose interop with LiveData (if you actually use it)
     implementation(libs.androidx.compose.runtime.livedata)
 
     // --- Room + KSP ---
@@ -100,13 +99,13 @@ dependencies {
     // --- Desugaring for java.time on API 24–25 ---
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    // --- Networking: Retrofit 3.x ---
-    val retrofitVersion = "3.0.0"
+    // --- Networking: Retrofit 2.x (fix) ---
+    val retrofitVersion = "2.11.0"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
 
-    // ConstraintLayout for Compose (stable)
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.0")
+    // --- AI (keep from Login) ---
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
     // --- Tests ---
     testImplementation(libs.junit)
