@@ -7,7 +7,7 @@ coreKtx = "1.17.0"
 lifecycleRuntimeKtx = "2.9.3"
 activityCompose = "1.10.1"
 composeBom = "2024.09.00"
-navigationCompose = "2.9.4"   # keep your newer version
+navigationCompose = "2.8.0"   # keep your newer version
 # runtime-livedata is managed by the Compose BoM, no explicit version
 
 # Testing
@@ -16,7 +16,7 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 
 # Extras (from main)
-room = "2.8.0"               # aligns with your explicit 2.8.0 usage
+room = "2.6.1"               # aligns with your explicit 2.8.0 usage
 coroutines = "1.9.0"
 ksp = "2.0.21-1.0.25"
 desugar = "2.1.5"
