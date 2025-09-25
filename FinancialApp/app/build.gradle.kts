@@ -73,7 +73,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.runtime.livedata)
-
     // --- Room + KSP ---
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
@@ -99,10 +98,13 @@ dependencies {
     // --- Desugaring for java.time on API 24–25 ---
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    // --- Networking: Retrofit 2.x (fix) ---
-    val retrofitVersion = "2.11.0"
+    // --- Networking: Retrofit 3.x ---
+    val retrofitVersion = "3.0.0"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+
+    // ConstraintLayout for Compose (stable)
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.0")
 
     // --- AI (keep from Login) ---
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
