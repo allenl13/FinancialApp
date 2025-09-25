@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.services)
 }
 
 ksp {
@@ -61,6 +61,7 @@ android {
 }
 
 dependencies {
+    // --- Core + Compose ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -69,40 +70,45 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-
-    // Navigation
     implementation(libs.androidx.navigation.compose)
 
-    // Room + KSP
+    // Compose interop with LiveData (if you actually use it)
+    implementation(libs.androidx.compose.runtime.livedata)
+
+    // --- Room + KSP ---
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
     ksp(libs.androidx.room.compiler)
 
-    // Coroutines
+    // --- Firebase (Auth + Firestore via BoM) ---
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+
+    // --- Optional classic Views (only if used somewhere) ---
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+
+    // --- Coroutines ---
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.kotlinx.coroutines.test)
 
-    // WorkManager (notifications)
+    // --- WorkManager ---
     implementation(libs.androidx.work.runtime.ktx)
 
-    // Desugaring for java.time on API 24–25
+    // --- Desugaring for java.time on API 24–25 ---
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    // Retrofit (existing networking)
+    // --- Networking: Retrofit 3.x ---
     val retrofitVersion = "3.0.0"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
 
-    //firebase auth/firestore
-    implementation(libs.androidx.compose.runtime.livedata)
+    // ConstraintLayout for Compose (stable)
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.0")
 
-    // CSV export (ONLY if code imports one of these)
-    // implementation(libs.opencsv)
-    // implementation(libs.commons-csv)
-
-    // Tests
+    // --- Tests ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
