@@ -2,8 +2,6 @@ package com.example.financialapp.Conversion
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.financialapp.Convertion.ConvertResponse
-import com.example.financialapp.Convertion.RetrofitInstance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
