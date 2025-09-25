@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 ksp {
@@ -75,6 +76,8 @@ dependencies {
     // Room + KSP
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     ksp(libs.androidx.room.compiler)
 
     // Coroutines
@@ -91,6 +94,9 @@ dependencies {
     val retrofitVersion = "3.0.0"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+
+    //firebase auth/firestore
+    implementation(libs.androidx.compose.runtime.livedata)
 
     // CSV export (ONLY if code imports one of these)
     // implementation(libs.opencsv)
