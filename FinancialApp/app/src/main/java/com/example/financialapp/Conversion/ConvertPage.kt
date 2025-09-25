@@ -1,7 +1,6 @@
-package com.example.financialapp.Convertion
+package com.example.financialapp.Conversion
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,13 +16,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.financialapp.Conversion.ConvertViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.financialapp.Conversion.Currencies
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,9 +37,7 @@ fun ConvertPage(viewModel: ConvertViewModel) {
 
     // Clear error when user starts typing
     LaunchedEffect(amount, from, to) {
-        if (errorMsg != null) {
-            viewModel.clearError()
-        }
+        if (errorMsg != null) viewModel.clearError()
     }
 
     Column(
@@ -93,16 +83,13 @@ fun ConvertPage(viewModel: ConvertViewModel) {
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "Enter Amount",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
@@ -124,19 +111,11 @@ fun ConvertPage(viewModel: ConvertViewModel) {
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 // From Currency
-                Text(
-                    text = "From",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Text(text = "From", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
                 ExposedDropdownMenuBox(
                     expanded = expFrom,
                     onExpandedChange = { expFrom = !expFrom }
@@ -150,7 +129,6 @@ fun ConvertPage(viewModel: ConvertViewModel) {
                             .fillMaxWidth()
                             .menuAnchor()
                     )
-
                     ExposedDropdownMenu(
                         expanded = expFrom,
                         onDismissRequest = { expFrom = false }
@@ -167,11 +145,9 @@ fun ConvertPage(viewModel: ConvertViewModel) {
                     }
                 }
 
-                Spacer(
-                    modifier = Modifier.height(16.dp)
-                )
+                Spacer(modifier = Modifier.height(16.dp))
 
-                //Swap current currency
+                // Swap currencies
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
@@ -191,11 +167,9 @@ fun ConvertPage(viewModel: ConvertViewModel) {
                     }
                 }
 
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
+                Spacer(modifier = Modifier.height(8.dp))
 
-                // changing "to" currency
+                // To Currency
                 Text(
                     text = "To",
                     fontSize = 16.sp,
@@ -216,7 +190,6 @@ fun ConvertPage(viewModel: ConvertViewModel) {
                             .fillMaxWidth()
                             .menuAnchor()
                     )
-
                     ExposedDropdownMenu(
                         expanded = expTo,
                         onDismissRequest = { expTo = false }
@@ -247,8 +220,8 @@ fun ConvertPage(viewModel: ConvertViewModel) {
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
                 .height(50.dp),
-            enabled = amount.toDoubleOrNull() != null && amount.toDoubleOrNull()
-                ?.let { it > 0 } == true && !isLoading && currenciesLoaded,
+            enabled = amount.toDoubleOrNull()?.let { it > 0 } == true &&
+                !isLoading && currenciesLoaded,
             shape = RoundedCornerShape(12.dp)
         ) {
             if (isLoading) {
@@ -256,22 +229,14 @@ fun ConvertPage(viewModel: ConvertViewModel) {
                     modifier = Modifier.size(20.dp),
                     color = MaterialTheme.colorScheme.onPrimary
                 )
-                Spacer(
-                    modifier = Modifier.width(8.dp)
-                )
-                Text(
-                    "Converting..."
-                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Converting...")
             } else {
-                Text(
-                    text = "Convert",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Text(text = "Convert", fontSize = 16.sp, fontWeight = FontWeight.Medium)
             }
         }
 
-        //Showing result
+        // Result / Error
         if (conversionResult != null || errorMsg != null) {
             Card(
                 modifier = Modifier
@@ -313,16 +278,13 @@ fun ConvertPage(viewModel: ConvertViewModel) {
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
-
                             Spacer(modifier = Modifier.height(12.dp))
-
-                            Text( // Currency being converted
+                            Text(
                                 text = "${result.amount} ${result.base}",
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
-
                             Text(
                                 text = "equals",
                                 fontSize = 14.sp,
@@ -331,13 +293,12 @@ fun ConvertPage(viewModel: ConvertViewModel) {
                             )
                             val target = to
                             val rate: Double = result.rates.values.firstOrNull() ?: 0.0
-                            Text( // Currency converted
+                            Text(
                                 text = "${"%.2f".format(rate)} $target",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-
                             Text(
                                 text = "Updated: ${result.date}",
                                 fontSize = 12.sp,

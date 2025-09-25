@@ -4,7 +4,15 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp") version "2.0.21-1.0.25"
+    // Use the version-catalog managed KSP & Google Services plugins
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.google.gms.google.services)
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.incremental", "true")
+    arg("room.generateKotlin", "true")
 }
 
 android {
@@ -39,7 +47,6 @@ android {
         }
     }
 
-    // Ensure BuildConfig is generated (on by default for app, explicit is fine)
     buildFeatures {
         compose = true
         buildConfig = true
@@ -55,6 +62,7 @@ android {
 }
 
 dependencies {
+    // --- Core + Compose ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -67,6 +75,38 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.runtime.livedata)
 
+    // --- Room + KSP ---
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // --- Firebase (Auth + Firestore via BoM) ---
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+
+    // --- Optional classic Views (only if used somewhere) ---
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+
+    // --- Coroutines ---
+    implementation(libs.kotlinx.coroutines.android)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // --- WorkManager ---
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // --- Desugaring for java.time on API 24–25 ---
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    // ConstraintLayout for Compose
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.0")
+
+    // --- AI (kept from Login) ---
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
+    // --- Tests ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -76,15 +116,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Room (KSP)
-    implementation("androidx.room:room-runtime:2.8.0")
-    implementation("androidx.room:room-ktx:2.8.0")
-    ksp("androidx.room:room-compiler:2.8.0")
-
-    // WorkManager
-    implementation("androidx.work:work-runtime-ktx:2.10.4")
-
-    // Retrofit + Gson
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    val retrofitVersion = "3.0.0"
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
 }

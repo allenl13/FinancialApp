@@ -1,4 +1,4 @@
-package com.example.financialapp.Convertion
+package com.example.financialapp.Conversion
 
 data class ConvertResponse(
     val amount: Double,

@@ -1,6 +1,5 @@
 package com.example.financialapp
 
-// Tristan's feature pages (fix package names if needed in your project)
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -22,12 +21,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.financialapp.Conversion.ConvertViewModel
-import com.example.financialapp.Convertion.ConvertPage
-import com.example.financialapp.Investment.InvestPage
-import com.example.financialapp.Investment.InvestViewModel
+
 import com.example.financialapp.notifications.EnsureNotificationsReady
-import com.example.financialapp.subscriptions.MainSub
 import com.example.financialapp.ui.category.CategoryListScreen
 import com.example.financialapp.ui.goal.GoalDetailScreen
 import com.example.financialapp.ui.goal.GoalsListScreen
@@ -35,6 +30,13 @@ import com.example.financialapp.ui.settings.SettingsScreen
 import com.example.financialapp.ui.theme.AppThemeExt
 import com.example.financialapp.ui.theme.ThemeViewModel
 import com.example.financialapp.ui.transactions.TransactionsViewModel
+import com.example.financialapp.subscriptions.MainSub
+
+// Feature pages (use the correct package names)
+import com.example.financialapp.Conversion.ConvertPage
+import com.example.financialapp.Conversion.ConvertViewModel
+import com.example.financialapp.Investment.InvestPage
+import com.example.financialapp.Investment.InvestViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,14 +96,18 @@ fun AppRoot(
                 startDestination = "sub",
                 modifier = Modifier.padding(inner)
             ) {
-                composable ("sub"){ MainSub() }
-                // Existing
+                // Subscriptions (start)
+                composable("sub") { MainSub() }
+
+                // Categories / Goals
                 composable("categories") { CategoryListScreen() }
                 composable("goals") { GoalsListScreen(nav) }
                 composable(
                     route = "goal/{goalId}",
                     arguments = listOf(navArgument("goalId") { type = NavType.LongType })
-                ) { GoalDetailScreen(nav) }
+                ) {
+                    GoalDetailScreen(nav)
+                }
 
                 // Feature routes
                 composable("invest")  { InvestPage(investViewModel) }

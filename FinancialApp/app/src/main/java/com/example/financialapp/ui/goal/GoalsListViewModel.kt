@@ -1,4 +1,4 @@
-package com.example.financialapp.ui.goal
+    package com.example.financialapp.ui.goal
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
