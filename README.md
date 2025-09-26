@@ -26,3 +26,6 @@ Our app helps manage investments, track subscriptions, set and monitor savings g
 
 2. **Access the Home Screen**  
    - After successful registration, you will be automatically redirected to the home screen where you can begin exploring the app’s features.  
+
+
+ *Tip: If you ever get stuck on any page in the app, simply press your phone’s back button to return to the previous screen.*  
