@@ -34,7 +34,61 @@ android {
             if (f.exists()) load(f.inputStream())
         }
         val alphaKey = props.getProperty("ALPHA_VANTAGE_KEY") ?: ""
+        val geminiKey = props.getProperty("GEMINI_API_KEY") ?: ""
+
         buildConfigField("String", "ALPHA_VANTAGE_KEY", "\"$alphaKey\"")
+
+        buildConfigField("String","FIREBASE_API_KEY","\"${props.getProperty("FIREBASE_API_KEY") ?: ""}\"")
+        buildConfigField("String","FIREBASE_APP_ID","\"${props.getProperty("FIREBASE_APP_ID") ?: ""}\"")
+        buildConfigField("String","FIREBASE_PROJECT_ID","\"${props.getProperty("FIREBASE_PROJECT_ID") ?: ""}\"")
+        buildConfigField("String","FIREBASE_SENDER_ID","\"${props.getProperty("FIREBASE_SENDER_ID") ?: ""}\"")
+        buildConfigField("String","FIREBASE_STORAGE_BUCKET","\"${props.getProperty("FIREBASE_STORAGE_BUCKET") ?: ""}\"")
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
+
+
+    }
+
+    tasks.register("writeGoogleServicesJson") {
+        doLast {
+            val props = Properties().apply {
+                val f = rootProject.file("local.properties")
+                if (f.exists()) f.inputStream().use { load(it) }
+            }
+
+            val projectId: String = props.getProperty("FIREBASE_PROJECT_ID") ?: ""
+            val appId: String = props.getProperty("FIREBASE_APP_ID") ?: ""
+            val apiKey: String = props.getProperty("FIREBASE_API_KEY") ?: ""
+            val senderId: String = props.getProperty("FIREBASE_SENDER_ID") ?: ""
+            val bucket: String = props.getProperty("FIREBASE_STORAGE_BUCKET") ?: ""
+
+            val json = """
+            {
+              "project_info": {
+                "project_id": "$projectId",
+                "storage_bucket": "$bucket",
+                "project_number": "$senderId"
+              },
+              "client": [{
+                "client_info": {
+                  "mobilesdk_app_id": "$appId",
+                  "android_client_info": { "package_name": "com.example.financialapp" }
+                },
+                "api_key": [{ "current_key": "$apiKey" }]
+              }],
+              "configuration_version": "1"
+            }
+        """.trimIndent()
+
+            // write into the *app* module
+            val out = file("$projectDir/google-services.json")
+            out.writeText(json)
+            println("Wrote ${out.absolutePath}")
+        }
+    }
+
+// run the writer before any build
+    tasks.named("preBuild").configure {
+        dependsOn("writeGoogleServicesJson")
     }
 
     buildTypes {
@@ -105,6 +159,7 @@ dependencies {
 
     // --- AI (kept from Login) ---
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
 
     // --- Tests ---
     testImplementation(libs.junit)

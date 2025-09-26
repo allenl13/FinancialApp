@@ -1,49 +1,62 @@
 package com.example.financialapp.Ai
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.financialapp.BuildConfig
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.launch
 
-class ChatViewModel : ViewModel()
-{
+class ChatViewModel : ViewModel() {
 
-    val messageList by lazy{
-        mutableStateListOf<MessageModel>()
-    }
+    val messageList by lazy { mutableStateListOf<MessageModel>() }
 
-    val generativeModel : GenerativeModel = GenerativeModel(
-        modelName = "gemini-1.5-flash",
-        apiKey = Constants.apiKey
+    val generativeModel = GenerativeModel(
+        modelName = "gemini-2.5-flash",
+        apiKey = BuildConfig.GEMINI_API_KEY
     )
-    fun sendMessage(question : String)
-    {
+
+
+    fun sendMessage(question: String) {
+        if (question.isBlank()) return
+
         viewModelScope.launch {
+            // user message
+            messageList.add(MessageModel(question, "user"))
+            // placeholder
+            messageList.add(MessageModel("Typing...", "model"))
 
             try {
-                val chat = generativeModel.startChat(
-                    history = messageList.map {
-                        content(it.role){text(it.message)}
-                    }.toList()
-                )
+                val history = messageList
+                    .filter { it.role == "user" || it.role == "model" }
+                    .map { m ->
+                        content(role = m.role) { text(m.message) }
+                    }
 
-                messageList.add(MessageModel(question,"user"))
-                messageList.add(MessageModel("Typing...","model"))
+                val chat = generativeModel.startChat(history = history)
 
                 val response = chat.sendMessage(question)
-                messageList.removeAt(messageList.lastIndex)
+                val text = response.text.orEmpty().ifBlank { "…no text returned…" }
 
-                messageList.add(MessageModel(response.text.toString(),"model"))
-
-            }
-            catch(e : Exception)
-            {
-                messageList.removeAt(messageList.lastIndex)
-                messageList.add(MessageModel("Error : "+ e.message.toString(),"model"))
+                // remove the typing bubble if it exists
+                if (messageList.isNotEmpty() && messageList.last().message == "Typing...") {
+                    messageList.removeAt(messageList.lastIndex)
+                }
+                messageList.add(MessageModel(text, "model"))
+            } catch (e: Exception) {
+                Log.e("ChatViewModel", "Gemini error", e)
+                if (messageList.isNotEmpty() && messageList.last().message == "Typing...") {
+                    messageList.removeAt(messageList.lastIndex)
+                }
+                messageList.add(
+                    MessageModel(
+                        "Error: ${e.message ?: "Unknown error"}",
+                        "model"
+                    )
+                )
             }
         }
-
     }
 }
