@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun SignupPage(
@@ -41,7 +42,7 @@ fun SignupPage(
 
     LaunchedEffect(authState.value) {
         when (authState.value) {
-            is AuthState.Authenticated -> navController.navigate("home")
+            is AuthState.Authenticated -> navController.navigate("main")
             is AuthState.Error -> Toast.makeText(
                 context,
                 (authState.value as AuthState.Error).message,
@@ -78,10 +79,29 @@ fun SignupPage(
             visualTransformation = PasswordVisualTransformation()
         )
 
+        // show requirement if password too short
+        if (password.isNotEmpty() && password.length < 6) {
+            Text(
+                text = "Password must be at least 6 characters",
+                fontSize = 12.sp,
+                color = Color.Red
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { authViewModel.signup(email, password) },
+            onClick = {
+                if (password.length >= 6) {
+                    authViewModel.signup(email, password)
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Password must be at least 6 characters",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
             enabled = authState.value != AuthState.Loading
         ) {
             Text(text = "Create account")
