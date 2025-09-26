@@ -91,7 +91,8 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(exportResult) {
                     exportResult?.let { res ->
                         if (res.isSuccess) {
-                            Toast.makeText(ctx, "CSV saved: ${res.getOrNull()}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(ctx, "CSV saved: ${res.getOrNull()}", Toast.LENGTH_LONG)
+                                .show()
                         } else {
                             Toast.makeText(
                                 ctx,
@@ -101,7 +102,7 @@ class MainActivity : ComponentActivity() {
                         }
                         txVm.consumeExportResult()
                     }
-                    
+                }
                 NavHost(
                     navController = nav,
                     startDestination = "login"

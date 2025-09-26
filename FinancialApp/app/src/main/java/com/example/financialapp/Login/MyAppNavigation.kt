@@ -43,8 +43,6 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
                 onCategoryClick= { nav.navigate("categories") },
                 onChatClick = { nav.navigate("chatpage") },
                 onLogoutClick = { nav.navigate("login") }
-                onSubsClick = { nav.navigate("subscription") },
-                onGoalsClick = { nav.navigate("goals") },
             )
         }
         composable("forgot")
