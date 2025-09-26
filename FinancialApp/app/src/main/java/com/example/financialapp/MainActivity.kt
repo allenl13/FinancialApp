@@ -43,6 +43,7 @@ import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.Login.pages.SignupPage
 import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.data.Transaction
+import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.notifications.EnsureSubNotificationsReady
 import com.example.financialapp.subscriptions.MainSub
@@ -100,12 +101,12 @@ class MainActivity : ComponentActivity() {
                         }
                         txVm.consumeExportResult()
                     }
-                }
-
+                    
                 NavHost(
                     navController = nav,
                     startDestination = "login"
                 ) {
+                  
                     composable("main") {
                         MainScreen(
                             expenses = mainViewModel.loadData(),
@@ -128,18 +129,21 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+                    
                     composable("convert") {
                         // Activity-scoped VM so it survives recompositions & navigation
                         ConvertPage(
                             ViewModelProvider(this@MainActivity)[ConvertViewModel::class.java]
                         )
                     }
+                    
                     composable("invest") {
                         // Provide repo via factory (needs Context)
                         val ctx = LocalContext.current
                         val vm: InvestViewModel = viewModel(factory = InvestVMFactory(ctx))
                         InvestPage(viewModel = vm)
                     }
+                    
                     composable("goals") {
                         GoalsListScreen(nav)   // list screen
                     }

@@ -31,7 +31,7 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
             SignupPage(modifier,nav,authViewModel)
         }
         //use for our home page
-        composable("main"){
+        composable("main") {
             val mainViewModel: MainViewModel = viewModel()
             MainScreen(
                 expenses = mainViewModel.loadData(),
@@ -43,6 +43,8 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
                 onCategoryClick= { nav.navigate("categories") },
                 onChatClick = { nav.navigate("chatpage") },
                 onLogoutClick = { nav.navigate("login") }
+                onSubsClick = { nav.navigate("subscription") },
+                onGoalsClick = { nav.navigate("goals") },
             )
         }
         composable("forgot")
