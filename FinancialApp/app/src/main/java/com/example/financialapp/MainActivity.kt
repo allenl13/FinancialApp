@@ -1,7 +1,7 @@
 package com.example.financialapp
 
 // Feature pages (use the correct package names)
-import android.os.Build
+
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
