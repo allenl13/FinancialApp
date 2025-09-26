@@ -4,6 +4,8 @@ package com.example.financialapp.subscriptions
 * this shows the main subscriptions page
 */
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,6 +47,7 @@ import androidx.navigation.NavController
 import kotlin.math.roundToInt
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewModel()) {
@@ -191,7 +194,7 @@ fun ManageDialog(
                 sub.copy(
                     name = editName.ifBlank { "Unknown" },
                     dueDate = editDueDate.ifBlank { "N/A" },
-                    recurrence = editRecurring.ifBlank { "Monthly" },
+                    recurrence = editRecurring.ifBlank { "month" },
                     amount = formatAmount,
                     category = editCategory.ifBlank { "Other" })
             )

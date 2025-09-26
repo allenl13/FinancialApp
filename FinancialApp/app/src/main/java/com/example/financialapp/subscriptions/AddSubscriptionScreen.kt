@@ -82,7 +82,7 @@ fun AddSubscriptionScreen(navController: NavController, vm: SubViewModel = viewM
                                         name = name.ifBlank { "Unknown" },
                                         amount = formatAmount,
                                         dueDate = due.ifBlank { "N/A" },
-                                        recurrence = recurring.ifBlank { "Monthly" },
+                                        recurrence = recurring.ifBlank { "month" },
                                         category = category.ifBlank { "Other" }
                                     )
                                 )
