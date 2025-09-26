@@ -1,6 +1,6 @@
 # FinancialApp 
 
-A financial app helps manage investments, track subscriptions, set and monitor savings goals, and perform real-time currency conversions. It also includes an AI-powered assistant, making financial management simpler and smarter.
+Our app helps manage investments, track subscriptions, set and monitor savings goals, and perform real-time currency conversions. It also includes an AI-powered assistant, making financial management simpler and smarter.
 
 ---
 
