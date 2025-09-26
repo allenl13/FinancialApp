@@ -2,11 +2,16 @@ package com.example.financialapp
 
 // Feature pages (use the correct package names)
 
+
+import android.R.attr.mode
+import android.R.id.primary
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -29,9 +34,15 @@ import com.example.financialapp.Ai.ChatViewModel
 import com.example.financialapp.Conversion.ConvertPage
 import com.example.financialapp.Conversion.ConvertViewModel
 import com.example.financialapp.Investment.InvestPage
+import com.example.financialapp.Investment.InvestVMFactory
 import com.example.financialapp.Investment.InvestViewModel
 import com.example.financialapp.Login.AuthViewModel
 import com.example.financialapp.Login.MyAppNavigation
+import com.example.financialapp.Login.pages.ForgotPassword
+import com.example.financialapp.Login.pages.LoginPage
+import com.example.financialapp.Login.pages.SignupPage
+import com.example.financialapp.dashboard.MainScreen
+import com.example.financialapp.data.Transaction
 import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.notifications.EnsureSubNotificationsReady
@@ -43,108 +54,169 @@ import com.example.financialapp.ui.settings.SettingsScreen
 import com.example.financialapp.ui.theme.AppThemeExt
 import com.example.financialapp.ui.theme.ThemeViewModel
 import com.example.financialapp.ui.transactions.TransactionsViewModel
+import com.example.financialapp.repo.MainViewModel
+import com.example.financialapp.ui.theme.FinancialAppTheme
+import com.example.financialapp.ui.theme.ThemeMode
+
 
 class MainActivity : ComponentActivity() {
+    private val mainViewModel: MainViewModel by viewModels()
+    private val convertViewModel: ConvertViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-         //val convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
-         //val investViewModel  = ViewModelProvider(this)[InvestViewModel::class.java]
-
         setContent {
-            AppRoot(
-                 //convertViewModel = convertViewModel,
-                 //investViewModel = investViewModel)
+            // App-wide theme + settings VMs
+            val themeVm: ThemeViewModel = viewModel()
+            val txVm: TransactionsViewModel = viewModel()
 
-            )}
-    }
-}
+            val mode by themeVm.mode.collectAsState()
+            val primary by themeVm.primaryArgb.collectAsState()
+            val exportResult by txVm.exportResult.collectAsState()
+            val authvm: AuthViewModel = viewModel() //signout
 
-@Composable
-fun AppRoot(
-   // convertViewModel: ConvertViewModel,
-   // investViewModel: InvestViewModel
-) {
-    // App-wide theme + settings VMs
-    val themeVm: ThemeViewModel = viewModel()
-    val txVm: TransactionsViewModel = viewModel()
+            AppThemeExt(
+                mode = mode,
+                primaryArgb = primary
+            ){
+                val nav = rememberNavController()
+                val ctx = LocalContext.current
 
-    val mode by themeVm.mode.collectAsState()
-    val primary by themeVm.primaryArgb.collectAsState()
-    val exportResult by txVm.exportResult.collectAsState()
+                // Set up notif channel + request POST_NOTIFICATIONS on Android 13+
+                EnsureNotificationsReady()
+                EnsureSubNotificationsReady()
 
-    AppThemeExt(mode = mode, primaryArgb = primary) {
-        EnsureNotificationsReady()
-        EnsureSubNotificationsReady()
-
-        val nav = rememberNavController()
-        val ctx = LocalContext.current
-
-        // Toast on CSV export result
-        LaunchedEffect(exportResult) {
-            exportResult?.let { res ->
-                if (res.isSuccess) {
-                    Toast.makeText(ctx, "CSV saved: ${res.getOrNull()}", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(
-                        ctx,
-                        "Export failed: ${res.exceptionOrNull()?.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-                txVm.consumeExportResult()
-            }
-        }
-
-        Scaffold(modifier = Modifier.fillMaxSize()) { inner ->
-            NavHost(
-                navController = nav,
-                startDestination = "login",
-                modifier = Modifier.padding(inner)
-            ) {
-                // Subscriptions (start)
-                composable("sub") { MainSub() }
-                composable("chatpage") {
-                    val chatvm: ChatViewModel = viewModel()
-                    ChatPage(
-                        viewModel = chatvm,   // whatever your VM variable is here
-                        modifier = Modifier
-                    )
-                }
-                composable("login")
-                {
-                    val authvm: AuthViewModel = viewModel() // or hiltViewModel() if using Hilt
-                    MyAppNavigation(
-                        modifier = Modifier,
-                        authViewModel = authvm
-                    )
-
-                }
-
-                // Categories / Goals
-                composable("categories") { CategoryListScreen() }
-                composable("goals") { GoalsListScreen(nav) }
-                composable(
-                    route = "goal/{goalId}",
-                    arguments = listOf(navArgument("goalId") { type = NavType.LongType })
+                // Toast on CSV export result
+                LaunchedEffect(exportResult) {
+                    exportResult?.let { res ->
+                        if (res.isSuccess) {
+                            Toast.makeText(ctx, "CSV saved: ${res.getOrNull()}", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(
+                                ctx,
+                                "Export failed: ${res.exceptionOrNull()?.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        txVm.consumeExportResult()
+                    }
+                    
+                NavHost(
+                    navController = nav,
+                    startDestination = "login"
                 ) {
-                    GoalDetailScreen(nav)
-                }
+                  
+                    composable("main") {
+                        MainScreen(
+                            expenses = mainViewModel.loadData(),
+                            onConvertClick = { nav.navigate("convert") },
+                            onInvestClick = { nav.navigate("invest") },
+                            onSubsClick   = { nav.navigate("subscriptions") },
+                            onGoalsClick  = { nav.navigate("goals") },
+                            onSettingsClick = { nav.navigate("settings") },
+                            onCategoryClick= { nav.navigate("categories") },
+                            onChatClick = { nav.navigate("chatpage") },
+                            onLogoutClick = {
+                                authvm.signout()  // <-- actually sign out (Firebase)
+                                nav.navigate("login") {
+                                    popUpTo(nav.graph.startDestinationId) {
+                                        inclusive = true
+                                    } // clear stack
+                                    launchSingleTop = true
+                                    restoreState = false
+                                }
+                            }
+                        )
+                    }
+                    
+                    composable("convert") {
+                        // Activity-scoped VM so it survives recompositions & navigation
+                        ConvertPage(
+                            ViewModelProvider(this@MainActivity)[ConvertViewModel::class.java]
+                        )
+                    }
+                    
+                    composable("invest") {
+                        // Provide repo via factory (needs Context)
+                        val ctx = LocalContext.current
+                        val vm: InvestViewModel = viewModel(factory = InvestVMFactory(ctx))
+                        InvestPage(viewModel = vm)
+                    }
+                    
+                    composable("goals") {
+                        GoalsListScreen(nav)   // list screen
+                    }
 
-                // Feature routes
-                 //composable("invest")  { InvestPage(investViewModel) }
-                 //composable("convert") { ConvertPage(convertViewModel) }
+                    composable(
+                        route = "goal/{goalId}",
+                        arguments = listOf(navArgument("goalId") { type = NavType.LongType })
+                    ) {
+                        GoalDetailScreen(nav)  // detail screen; reads goalId via SavedStateHandle
+                    }
 
-                // Settings (theme + CSV export)
-                composable("settings") {
-                    SettingsScreen(
-                        currentMode = mode,
-                        currentPrimary = primary,
-                        onChangeMode = themeVm::setMode,
-                        onChangeColor = themeVm::setPrimaryColor,
-                        onExportCsv = { txVm.exportCsv(ctx) }
-                    )
+                    composable("subscriptions") {
+                        MainSub()
+                    }
+
+                    // Settings (theme + CSV export)
+                    composable("settings") {
+                        SettingsScreen(
+                            currentMode = mode,
+                            currentPrimary = primary,
+                            onChangeMode = themeVm::setMode,
+                            onChangeColor = themeVm::setPrimaryColor,
+                            onExportCsv = {
+                                val expenses = mainViewModel.loadData()
+                                val txs = expenses.map { e ->
+                                    Transaction(
+                                        date = e.time,
+                                        amount = e.price,
+                                        category = e.title,
+                                    )
+                                }
+                                txVm.exportCsv(ctx)
+                            }
+                        )
+                    }
+
+                    //Ai page
+                    composable ("chatpage") {
+                        val chatvm: ChatViewModel = viewModel()
+                        ChatPage(
+                            viewModel = chatvm,   // whatever your VM variable is here
+                            modifier = Modifier
+                        )
+                    }
+
+                    //start on login page
+                    // ------ Auth flow ------
+                    composable("login") {
+                        val authvm: AuthViewModel = viewModel()
+                        LoginPage(
+                            navController = nav,
+                            authViewModel = authvm
+                        )
+                    }
+                    composable("signup") {
+                        val authvm: AuthViewModel = viewModel()
+                        SignupPage(
+                            navController = nav,
+                            authViewModel = authvm
+                        )
+                    }
+                    composable("forgot") {
+                        val authvm: AuthViewModel = viewModel()
+                        ForgotPassword(
+                            vm = authvm,
+                            onBackToLogin = { nav.popBackStack("login", inclusive = false) }
+                        )
+                    }
+
+                    //categories page
+                    composable("categories"){
+                        CategoryListScreen()
+                    }
                 }
             }
         }

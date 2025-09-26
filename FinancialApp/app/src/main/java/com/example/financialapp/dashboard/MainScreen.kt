@@ -4,14 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.financialapp.R
 import com.example.financialapp.repo.ExpenseDomain
 
 @Composable
@@ -29,7 +32,11 @@ fun MainScreenPreview(){
         onConvertClick = {},
         onInvestClick = {},
         onSubsClick = {},
-        onGoalsClick = {}
+        onGoalsClick = {},
+        onSettingsClick = {},
+        onChatClick = {},
+        onCategoryClick = {},
+        onLogoutClick = {}
     )
 }
 
@@ -40,7 +47,11 @@ fun MainScreen(
     onConvertClick: () -> Unit,
     onInvestClick: () -> Unit,
     onSubsClick: () -> Unit,
-    onGoalsClick: () -> Unit
+    onGoalsClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onChatClick: () -> Unit,
+    onCategoryClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -74,5 +85,18 @@ fun MainScreen(
                 ExpenseList(item)
             }
         }
+        ButtonNavBar(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .height(80.dp),
+            onItemSelected = { itemId ->
+                when (itemId){
+                    R.id.chatBot -> onChatClick()
+                    R.id.settings -> onSettingsClick()
+                    R.id.categories -> onCategoryClick()
+                    R.id.logout -> onLogoutClick()
+                }
+            }
+        )
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +33,7 @@ fun ButtonRow(
     onConvertClick: () -> Unit,
     onInvestClick: () -> Unit,
     onSubsClick: () -> Unit,
-    onGoalsClick: () -> Unit
+    onGoalsClick: () -> Unit,
 ) {
 
     // icon grid row
@@ -60,7 +61,7 @@ fun RowScope.ButtonItem(
             .weight(1f)
             .height(78.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(colorResource(R.color.teal_200))
+            .background(MaterialTheme.colorScheme.primaryContainer)
             .clickable { onClick() }
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -69,7 +70,7 @@ fun RowScope.ButtonItem(
         Image(painter = painterResource(icon), contentDescription = null, modifier = Modifier.size(32.dp))
         Text(
             text = text,
-            color = colorResource(R.color.purple_500),
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
             fontSize = 10.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier
