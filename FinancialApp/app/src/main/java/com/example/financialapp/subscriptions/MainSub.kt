@@ -26,7 +26,7 @@ fun MainSub() {
     val navController = rememberNavController()
 
     Surface(color = MaterialTheme.colorScheme.background) {
-        NavHost(navController = navController, startDestination = HOME) {
+        NavHost(navController = navController, startDestination = SUBS) {
             composable(HOME) {
                 HomeScreen(onOpenSubs = {
                     navController.navigate(SUBS)

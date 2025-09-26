@@ -22,4 +22,6 @@ interface SubDao {
     @Query("SELECT * FROM subscriptions ORDER BY dueDate ASC")
     fun readAllData(): LiveData<List<SubEntity>>
 
+    @Query("SELECT * FROM subscriptions")
+    suspend fun getAllNow(): List<SubEntity>
 }

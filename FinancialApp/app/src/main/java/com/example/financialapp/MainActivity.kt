@@ -1,11 +1,13 @@
 package com.example.financialapp
 
 // Feature pages (use the correct package names)
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -27,6 +29,7 @@ import com.example.financialapp.Conversion.ConvertViewModel
 import com.example.financialapp.Investment.InvestPage
 import com.example.financialapp.Investment.InvestViewModel
 import com.example.financialapp.notifications.EnsureNotificationsReady
+import com.example.financialapp.notifications.EnsureSubNotificationsReady
 import com.example.financialapp.subscriptions.MainSub
 import com.example.financialapp.ui.category.CategoryListScreen
 import com.example.financialapp.ui.goal.GoalDetailScreen
@@ -41,14 +44,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
-        val investViewModel  = ViewModelProvider(this)[InvestViewModel::class.java]
+         val convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
+         val investViewModel  = ViewModelProvider(this)[InvestViewModel::class.java]
 
         setContent {
             AppRoot(
-                convertViewModel = convertViewModel,
-                investViewModel = investViewModel
-            )
+                 convertViewModel = convertViewModel,
+                 investViewModel = investViewModel)
+
         }
     }
 }
@@ -68,6 +71,7 @@ fun AppRoot(
 
     AppThemeExt(mode = mode, primaryArgb = primary) {
         EnsureNotificationsReady()
+        EnsureSubNotificationsReady()
 
         val nav = rememberNavController()
         val ctx = LocalContext.current
@@ -108,8 +112,8 @@ fun AppRoot(
                 }
 
                 // Feature routes
-                composable("invest")  { InvestPage(investViewModel) }
-                composable("convert") { ConvertPage(convertViewModel) }
+                 composable("invest")  { InvestPage(investViewModel) }
+                 composable("convert") { ConvertPage(convertViewModel) }
 
                 // Settings (theme + CSV export)
                 composable("settings") {
