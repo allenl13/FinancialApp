@@ -29,6 +29,7 @@ appcompat = "1.7.1"
 material = "1.13.0"
 activity = "1.11.0"
 
+
 [libraries]
 # Core / lifecycle / compose
 androidx-core-ktx                 = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -71,6 +72,8 @@ androidx-activity                 = { group = "androidx.activity", name = "activ
 firebase-bom                      = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-auth                     = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 firebase-firestore                = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
+
+
 
 # Testing
 junit                             = { group = "junit", name = "junit", version.ref = "junit" }

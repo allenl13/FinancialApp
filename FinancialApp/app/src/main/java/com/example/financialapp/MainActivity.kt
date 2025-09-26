@@ -24,10 +24,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.financialapp.Ai.ChatPage
+import com.example.financialapp.Ai.ChatViewModel
 import com.example.financialapp.Conversion.ConvertPage
 import com.example.financialapp.Conversion.ConvertViewModel
 import com.example.financialapp.Investment.InvestPage
 import com.example.financialapp.Investment.InvestViewModel
+import com.example.financialapp.Login.AuthViewModel
+import com.example.financialapp.Login.MyAppNavigation
+import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.notifications.EnsureSubNotificationsReady
 import com.example.financialapp.subscriptions.MainSub
@@ -44,22 +49,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-         val convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
-         val investViewModel  = ViewModelProvider(this)[InvestViewModel::class.java]
+         //val convertViewModel = ViewModelProvider(this)[ConvertViewModel::class.java]
+         //val investViewModel  = ViewModelProvider(this)[InvestViewModel::class.java]
 
         setContent {
             AppRoot(
-                 convertViewModel = convertViewModel,
-                 investViewModel = investViewModel)
+                 //convertViewModel = convertViewModel,
+                 //investViewModel = investViewModel)
 
-        }
+            )}
     }
 }
 
 @Composable
 fun AppRoot(
-    convertViewModel: ConvertViewModel,
-    investViewModel: InvestViewModel
+   // convertViewModel: ConvertViewModel,
+   // investViewModel: InvestViewModel
 ) {
     // App-wide theme + settings VMs
     val themeVm: ThemeViewModel = viewModel()
@@ -95,11 +100,27 @@ fun AppRoot(
         Scaffold(modifier = Modifier.fillMaxSize()) { inner ->
             NavHost(
                 navController = nav,
-                startDestination = "sub",
+                startDestination = "login",
                 modifier = Modifier.padding(inner)
             ) {
                 // Subscriptions (start)
                 composable("sub") { MainSub() }
+                composable("chatpage") {
+                    val chatvm: ChatViewModel = viewModel()
+                    ChatPage(
+                        viewModel = chatvm,   // whatever your VM variable is here
+                        modifier = Modifier
+                    )
+                }
+                composable("login")
+                {
+                    val authvm: AuthViewModel = viewModel() // or hiltViewModel() if using Hilt
+                    MyAppNavigation(
+                        modifier = Modifier,
+                        authViewModel = authvm
+                    )
+
+                }
 
                 // Categories / Goals
                 composable("categories") { CategoryListScreen() }
@@ -112,8 +133,8 @@ fun AppRoot(
                 }
 
                 // Feature routes
-                 composable("invest")  { InvestPage(investViewModel) }
-                 composable("convert") { ConvertPage(convertViewModel) }
+                 //composable("invest")  { InvestPage(investViewModel) }
+                 //composable("convert") { ConvertPage(convertViewModel) }
 
                 // Settings (theme + CSV export)
                 composable("settings") {
