@@ -1,4 +1,4 @@
-package com.example.financialapp.Convertion
+package com.example.financialapp.Conversion
 
 import retrofit2.http.GET
 import retrofit2.http.Query
