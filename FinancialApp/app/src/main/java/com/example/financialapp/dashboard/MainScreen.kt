@@ -3,13 +3,19 @@ package com.example.financialapp.dashboard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -17,12 +23,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.financialapp.R
 import com.example.financialapp.repo.ExpenseDomain
+import com.example.financialapp.wallet.AddCardDialog
+import com.example.financialapp.wallet.WalletCard
 import com.example.financialapp.wallet.WalletListViewModel
+
 //
 //@Composable
 //@Preview (showBackground = true)
@@ -62,12 +75,12 @@ fun MainScreen(
     onChatClick: () -> Unit,
     onCategoryClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    onAddCardClick: () -> Unit,
-    walletVm: WalletListViewModel,
-    function: () -> Unit
+    function: () -> Unit,
 ) {
-    val cards by walletVm.card.collectAsState() // list comes from VM
-    val current = cards.lastOrNull()
+    val walletVm: WalletListViewModel = viewModel()
+    val cards by walletVm.card.collectAsState()
+
+    var showAdd by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -84,7 +97,6 @@ fun MainScreen(
 
             item {
                 UserCard(
-                    card = current,
                     onClick = onCardClick
                 )
             }
@@ -97,6 +109,20 @@ fun MainScreen(
                     onGoalsClick = onGoalsClick
                 )
             }
+
+            if (cards.isNotEmpty()) {
+                item {
+                    Text(
+                        "Your cards",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+                items(cards, key = { it.id }) { c ->
+                    WalletCardRow(c)
+                }
+            }
+
         }
 
         ButtonNavBar(
@@ -114,7 +140,7 @@ fun MainScreen(
         )
 
         ExtendedFloatingActionButton(
-            onClick = onAddCardClick,
+            onClick = { showAdd = true },
             text = { Text("Add Card") },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -123,4 +149,36 @@ fun MainScreen(
             icon = { Icon(Icons.Rounded.Add, contentDescription = null) }
         )
     }
+
+    if (showAdd) {
+        AddCardDialog(
+            onDismiss = { showAdd = false },
+            onConfirm = { name, network, last4, expire ->
+                walletVm.create(name, network, last4, expire)
+                showAdd = false
+            }
+        )
+    }
 }
+
+@Composable
+private fun WalletCardRow(item: WalletCard) {
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(item.name, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                "${item.network} •••• ${item.last4} | Exp ${item.expire}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+    Spacer(Modifier.height(8.dp))
+}
+

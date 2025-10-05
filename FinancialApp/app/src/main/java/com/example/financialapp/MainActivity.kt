@@ -61,12 +61,12 @@ class MainActivity : ComponentActivity() {
             // App-wide theme + settings VMs
             val themeVm: ThemeViewModel = viewModel()
             val txVm: TransactionsViewModel = viewModel()
-            val walletVm: WalletListViewModel = viewModel()
 
             val mode by themeVm.mode.collectAsState()
             val primary by themeVm.primaryArgb.collectAsState()
             val exportResult by txVm.exportResult.collectAsState()
             val authvm: AuthViewModel = viewModel() //signout
+            val walletVm: WalletListViewModel = viewModel()
 
             AppThemeExt(
                 mode = mode,
@@ -121,8 +121,6 @@ class MainActivity : ComponentActivity() {
                                     restoreState = false
                                 }
                             },
-                            onAddCardClick = {nav.navigate("addCard")},
-                            walletVm = walletVm
                         ) { nav.navigate("login") }
                     }
                     
@@ -180,7 +178,7 @@ class MainActivity : ComponentActivity() {
                     composable ("chatpage") {
                         val chatvm: ChatViewModel = viewModel()
                         ChatPage(
-                            viewModel = chatvm,   // whatever your VM variable is here
+                            viewModel = chatvm,
                             modifier = Modifier
                         )
                     }

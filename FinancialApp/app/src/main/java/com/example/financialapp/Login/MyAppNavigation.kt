@@ -15,13 +15,11 @@ import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.Login.pages.SignupPage
 import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.repo.MainViewModel
-import com.example.financialapp.wallet.WalletListViewModel
 
 //login/signup/forgor navigation
 @Composable
 fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) {
     val nav = rememberNavController()
-    val walletVm: WalletListViewModel = viewModel()
 
     NavHost(navController = nav, startDestination = "login", builder = {
         composable("login"){
@@ -44,8 +42,6 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
                 onChatClick = { nav.navigate("chatpage") },
                 onCategoryClick = { nav.navigate("categories") },
                 onLogoutClick   = { nav.navigate("login") { popUpTo("login") { inclusive = true } } },
-                onAddCardClick = { nav.navigate("addCard") },
-                walletVm        = walletVm
             ) { nav.navigate("login") }
         }
         composable("forgot")

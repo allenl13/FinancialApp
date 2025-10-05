@@ -38,7 +38,7 @@ fun AddCardScreen (
 }
 
 @Composable
-private fun AddCardDialog (
+fun AddCardDialog (
     onDismiss: () -> Unit,
     onConfirm: (
             name: String,
