@@ -23,11 +23,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.financialapp.R
+import com.example.financialapp.wallet.WalletCard
 
 @Composable
-@Preview
+//@Preview
 fun UserCard(
-    onClick: () -> Unit = { }
+    card: WalletCard?,
+    onClick: () -> Unit = { },
+
 ){
     Box(
         modifier = Modifier
@@ -59,7 +62,7 @@ fun UserCard(
                 .offset(y = (-80).dp)
         )
         Text(
-            text = "**** 1234",
+            text  = "**** ${card?.last4 ?: "1234"}",
             color = Color.White,
             fontSize = 12.sp,
             modifier = Modifier
@@ -68,7 +71,7 @@ fun UserCard(
                 .offset(y = (-80).dp)
         )
         Text(
-            text = "DEBIT",
+            text  = (card?.network ?: "DEBIT").uppercase(),
             color = Color.White,
             fontSize = 14.sp,
             modifier = Modifier

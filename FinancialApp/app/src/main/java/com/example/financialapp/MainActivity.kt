@@ -3,20 +3,12 @@ package com.example.financialapp
 // Feature pages (use the correct package names)
 
 
-import android.R.attr.mode
-import android.R.id.primary
-import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,13 +29,11 @@ import com.example.financialapp.Investment.InvestPage
 import com.example.financialapp.Investment.InvestVMFactory
 import com.example.financialapp.Investment.InvestViewModel
 import com.example.financialapp.Login.AuthViewModel
-import com.example.financialapp.Login.MyAppNavigation
 import com.example.financialapp.Login.pages.ForgotPassword
 import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.Login.pages.SignupPage
 import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.data.Transaction
-import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.notifications.EnsureSubNotificationsReady
 import com.example.financialapp.subscriptions.MainSub
@@ -55,8 +45,9 @@ import com.example.financialapp.ui.theme.AppThemeExt
 import com.example.financialapp.ui.theme.ThemeViewModel
 import com.example.financialapp.ui.transactions.TransactionsViewModel
 import com.example.financialapp.repo.MainViewModel
-import com.example.financialapp.ui.theme.FinancialAppTheme
-import com.example.financialapp.ui.theme.ThemeMode
+import com.example.financialapp.wallet.AddCardScreen
+import com.example.financialapp.wallet.WalletHome
+import com.example.financialapp.wallet.WalletListViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -70,6 +61,7 @@ class MainActivity : ComponentActivity() {
             // App-wide theme + settings VMs
             val themeVm: ThemeViewModel = viewModel()
             val txVm: TransactionsViewModel = viewModel()
+            val walletVm: WalletListViewModel = viewModel()
 
             val mode by themeVm.mode.collectAsState()
             val primary by themeVm.primaryArgb.collectAsState()
@@ -110,14 +102,15 @@ class MainActivity : ComponentActivity() {
                   
                     composable("main") {
                         MainScreen(
+                            onCardClick = { nav.navigate("wallet") },
                             expenses = mainViewModel.loadData(),
                             onConvertClick = { nav.navigate("convert") },
                             onInvestClick = { nav.navigate("invest") },
                             onSubsClick   = { nav.navigate("subscriptions") },
                             onGoalsClick  = { nav.navigate("goals") },
                             onSettingsClick = { nav.navigate("settings") },
-                            onCategoryClick= { nav.navigate("categories") },
                             onChatClick = { nav.navigate("chatpage") },
+                            onCategoryClick= { nav.navigate("categories") },
                             onLogoutClick = {
                                 authvm.signout()  // <-- actually sign out (Firebase)
                                 nav.navigate("login") {
@@ -127,8 +120,10 @@ class MainActivity : ComponentActivity() {
                                     launchSingleTop = true
                                     restoreState = false
                                 }
-                            }
-                        )
+                            },
+                            onAddCardClick = {nav.navigate("addCard")},
+                            walletVm = walletVm
+                        ) { nav.navigate("login") }
                     }
                     
                     composable("convert") {
@@ -218,6 +213,16 @@ class MainActivity : ComponentActivity() {
                     composable("categories"){
                         CategoryListScreen()
                     }
+
+                    // add wallet
+                    composable("wallet") { WalletHome(
+                        nav,
+                        expenses = viewModel<MainViewModel>().loadData(),
+                    ) }
+                    composable("addCard") { AddCardScreen(
+                        onDone = { nav.popBackStack() },
+                        vm = walletVm
+                    ) }
                 }
             }
         }

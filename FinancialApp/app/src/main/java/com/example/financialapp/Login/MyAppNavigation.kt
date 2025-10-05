@@ -1,6 +1,5 @@
 package com.example.financialapp.Login
 
-import androidx.activity.viewModels
 import com.example.financialapp.Login.pages.ForgotPassword
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,12 +15,13 @@ import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.Login.pages.SignupPage
 import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.repo.MainViewModel
-import kotlin.getValue
+import com.example.financialapp.wallet.WalletListViewModel
 
 //login/signup/forgor navigation
 @Composable
 fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) {
     val nav = rememberNavController()
+    val walletVm: WalletListViewModel = viewModel()
 
     NavHost(navController = nav, startDestination = "login", builder = {
         composable("login"){
@@ -34,16 +34,19 @@ fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) 
         composable("main") {
             val mainViewModel: MainViewModel = viewModel()
             MainScreen(
+                onCardClick = { nav.navigate("wallet") },
                 expenses = mainViewModel.loadData(),
                 onConvertClick = { nav.navigate("convert") },
                 onInvestClick = { nav.navigate("invest") },
-                onSubsClick   = { nav.navigate("subscriptions") },
-                onGoalsClick  = { nav.navigate("goals") },
+                onSubsClick = { nav.navigate("subscriptions") },
+                onGoalsClick = { nav.navigate("goals") },
                 onSettingsClick = { nav.navigate("settings") },
-                onCategoryClick= { nav.navigate("categories") },
                 onChatClick = { nav.navigate("chatpage") },
-                onLogoutClick = { nav.navigate("login") }
-            )
+                onCategoryClick = { nav.navigate("categories") },
+                onLogoutClick   = { nav.navigate("login") { popUpTo("login") { inclusive = true } } },
+                onAddCardClick = { nav.navigate("addCard") },
+                walletVm        = walletVm
+            ) { nav.navigate("login") }
         }
         composable("forgot")
         {
