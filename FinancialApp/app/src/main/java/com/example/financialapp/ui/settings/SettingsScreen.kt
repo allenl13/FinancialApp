@@ -13,6 +13,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.financialapp.ui.theme.ThemeMode
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import com.example.financialapp.R
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.collectAsState
+
+
 
 @Composable
 fun SettingsScreen(
@@ -21,6 +35,7 @@ fun SettingsScreen(
     onChangeMode: (ThemeMode) -> Unit,
     onChangeColor: (Long) -> Unit,
     onExportCsv: () -> Unit
+
 ) {
     val swatches = listOf(0xFF6750A4, 0xFF1E88E5, 0xFF43A047, 0xFFFB8C00, 0xFFE53935, 0xFF00897B)
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -31,7 +46,7 @@ fun SettingsScreen(
             Radio("Light", currentMode == ThemeMode.LIGHT) { onChangeMode(ThemeMode.LIGHT) }
             Radio("Dark", currentMode == ThemeMode.DARK) { onChangeMode(ThemeMode.DARK) }
         }
-
+        ProfilePhotoSection()
         Text("Primary color", style = MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             swatches.forEach { argb ->
@@ -46,6 +61,7 @@ fun SettingsScreen(
 
         Button(onClick = {}) { Text("Primary sample") }
         Button(onClick = onExportCsv) { Text("Export Transactions (CSV)") }
+
     }
 }
 
@@ -54,3 +70,43 @@ fun SettingsScreen(
         RadioButton(selected = selected, onClick = onClick); Text(label)
     }
 }
+@Composable
+fun ProfilePhotoSection(context: Context = LocalContext.current) {
+    val viewModel = remember { ProfileViewModel(context) }
+    val imageUri by viewModel.imageUri.collectAsState()
+
+    val picker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            viewModel.onImageSelected(uri)
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AsyncImage(
+            model = imageUri ?: R.mipmap.ic_launcher,
+            contentDescription = "Profile photo",
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        Button(onClick = {
+            picker.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }) {
+            Text("Change Profile Photo")
+        }
+    }
+}
+
+

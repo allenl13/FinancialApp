@@ -16,6 +16,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.financialapp.R
 import com.example.financialapp.repo.ExpenseDomain
+import coil.compose.AsyncImage
+import com.example.financialapp.ui.settings.ProfileViewModel
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+
+
 
 @Composable
 @Preview (showBackground = true)
@@ -85,6 +97,13 @@ fun MainScreen(
                 ExpenseList(item)
             }
         }
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 33.dp, end = 14.dp)
+        ) {
+            SmallProfileAvatar(onClick = onSettingsClick)
+        }
         ButtonNavBar(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -97,6 +116,31 @@ fun MainScreen(
                     R.id.logout -> onLogoutClick()
                 }
             }
+        )
+    }
+}
+
+@Composable
+private fun SmallProfileAvatar(
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val vm = remember { ProfileViewModel(context) }
+    val imageUri by vm.imageUri.collectAsState()
+
+    IconButton(onClick = onClick,modifier = Modifier.size(56.dp)) {
+        AsyncImage(
+            model = imageUri ?: R.mipmap.ic_launcher,
+            contentDescription = "Profile",
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .border(
+                    width = 3.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = CircleShape
+                ),
+            contentScale = ContentScale.Crop
         )
     }
 }
