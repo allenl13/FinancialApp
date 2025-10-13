@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,10 +37,10 @@ fun ExpenseList(item: ExpenseDomain){
             .height(70.dp)
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(size = 12.dp))
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .border(
                 width = 1.dp,
-                color = Color.LightGray,
+                color = MaterialTheme.colorScheme.outlineVariant,
                 shape = RoundedCornerShape(12.dp)
             ),
         verticalAlignment = Alignment.CenterVertically
@@ -57,7 +58,7 @@ fun ExpenseList(item: ExpenseDomain){
                 .padding(8.dp)
                 .size(55.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(colorResource(R.color.teal_200))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
                 .padding(12.dp)
         )
         Column(
@@ -69,16 +70,16 @@ fun ExpenseList(item: ExpenseDomain){
                 item.title,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = colorResource(R.color.purple_700)
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                item.time, color = colorResource(R.color.purple_700)
+                item.time, color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = "$${item.price}",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = colorResource(R.color.purple_700),
+                color = Color.White,
                 modifier = Modifier.padding(end = 16.dp)
             )
         }
