@@ -150,7 +150,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("subscriptions") {
-                        MainSub()
+                        MainSub(exit = {nav.popBackStack()})
                     }
 
                     // Settings (theme + CSV export)
