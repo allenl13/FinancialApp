@@ -4,9 +4,12 @@ package com.example.financialapp.subscriptions
 *
 */
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.input.key.Key.Companion.Back
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -21,8 +24,9 @@ object Routes {
 
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainSub() {
+fun MainSub(exit: () -> Unit) {
     val navController = rememberNavController()
 
     Surface(color = MaterialTheme.colorScheme.background) {
@@ -33,7 +37,8 @@ fun MainSub() {
                 })
             }
             composable(SUBS) {
-                SubscriptionScreen(navController)
+                SubscriptionScreen(navController,
+                    back = exit)
             }
             composable(ADD) {
                 AddSubscriptionScreen(navController)

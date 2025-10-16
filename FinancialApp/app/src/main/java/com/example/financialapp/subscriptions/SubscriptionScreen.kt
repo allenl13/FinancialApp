@@ -50,7 +50,7 @@ import kotlin.math.roundToInt
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewModel()) {
+fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewModel(), back: () -> Unit) {
     val subs by vm.readAllData.observeAsState(emptyList())
     var showManageDialog by remember { mutableStateOf(false) }
     var selectedSub by remember { mutableStateOf<SubEntity?>(null) }
@@ -60,7 +60,7 @@ fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewMode
             CenterAlignedTopAppBar(
                 title = { Text("Subscriptions", fontSize = 25.sp) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = back) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"

@@ -3,12 +3,14 @@ package com.example.financialapp
 // Feature pages (use the correct package names)
 
 
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +38,7 @@ import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.data.Transaction
 import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.notifications.EnsureSubNotificationsReady
+import com.example.financialapp.repo.MainViewModel
 import com.example.financialapp.subscriptions.MainSub
 import com.example.financialapp.ui.category.CategoryListScreen
 import com.example.financialapp.ui.goal.GoalDetailScreen
@@ -44,7 +47,6 @@ import com.example.financialapp.ui.settings.SettingsScreen
 import com.example.financialapp.ui.theme.AppThemeExt
 import com.example.financialapp.ui.theme.ThemeViewModel
 import com.example.financialapp.ui.transactions.TransactionsViewModel
-import com.example.financialapp.repo.MainViewModel
 import com.example.financialapp.wallet.AddCardScreen
 import com.example.financialapp.wallet.WalletHome
 import com.example.financialapp.wallet.WalletListViewModel
@@ -54,6 +56,7 @@ class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
     private val convertViewModel: ConvertViewModel by viewModels()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -150,7 +153,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("subscriptions") {
-                        MainSub()
+                        MainSub(exit = {nav.popBackStack()})
                     }
 
                     // Settings (theme + CSV export)
