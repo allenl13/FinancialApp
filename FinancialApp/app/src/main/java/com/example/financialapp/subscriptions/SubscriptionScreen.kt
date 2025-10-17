@@ -46,14 +46,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlin.math.roundToInt
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewModel(), back: () -> Unit) {
+fun SubscriptionScreen(
+    navController: NavController,
+    vm: SubViewModel = viewModel(),
+    back: () -> Unit
+) {
     val subs by vm.readAllData.observeAsState(emptyList())
     var showManageDialog by remember { mutableStateOf(false) }
     var selectedSub by remember { mutableStateOf<SubEntity?>(null) }
+    val isPaid: Boolean = false;
 
     Scaffold(
         topBar = {
@@ -148,6 +152,16 @@ fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewMode
                 vm.delete(selectedSub!!)
                 showManageDialog = false
                 selectedSub = null
+            }, MarkPaid = { s ->
+                val current = parseAnyDate(s.dueDate)
+                if (current != null) {
+                    val next = NextRecurrence(current, s.recurrence)
+                    val updated = s.copy(dueDate = next.format(formatted))
+                    vm.update(updated)
+                }
+                showManageDialog = false;
+                selectedSub = null
+
             })
         }
     }
@@ -157,7 +171,11 @@ fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewMode
 
 @Composable
 fun ManageDialog(
-    sub: SubEntity, onDismiss: () -> Unit, onSave: (SubEntity) -> Unit, onDelete: () -> Unit
+    sub: SubEntity,
+    onDismiss: () -> Unit,
+    onSave: (SubEntity) -> Unit,
+    onDelete: () -> Unit,
+    MarkPaid: (SubEntity) -> Unit
 ) {
     var editName by remember { mutableStateOf(sub.name) }
     var editAmount by remember { mutableStateOf("%.2f".format(sub.amount / 100.0)) }
@@ -204,6 +222,7 @@ fun ManageDialog(
         }) { Text("Save") }
     }, dismissButton = {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextButton(onClick = { MarkPaid(sub) }) { Text("Mark as Paid") }
             TextButton(onClick = onDelete) { Text("Delete") }
         }
     })
