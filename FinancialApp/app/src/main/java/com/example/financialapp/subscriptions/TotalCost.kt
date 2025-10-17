@@ -16,14 +16,14 @@ import androidx.compose.ui.unit.sp
 @SuppressLint("DefaultLocale")
 @Composable
 fun TotalCost(subs: List<SubEntity>) {
-    var totalActive = 0;
+    var totalActive = 0
     for (sub in subs) {
         if (sub.isActive) {
             totalActive = totalActive + sub.amount
         }
     }
 
-    val totalAmount = totalActive / 100.0;
+    val totalAmount = totalActive / 100.0
 
     Card(
         modifier = Modifier

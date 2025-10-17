@@ -57,7 +57,6 @@ fun SubscriptionScreen(
     val subs by vm.readAllData.observeAsState(emptyList())
     var showManageDialog by remember { mutableStateOf(false) }
     var selectedSub by remember { mutableStateOf<SubEntity?>(null) }
-    val isPaid: Boolean = false;
 
     Scaffold(
         topBar = {
@@ -117,7 +116,7 @@ fun SubscriptionScreen(
                                         "$" + "%.2f".format(sub.amount / 100.0) + " / ${sub.recurrence}",
                                         fontSize = 16.sp
                                     )
-                                    Text("${sub.category}", fontSize = 16.sp)
+                                    Text(sub.category, fontSize = 16.sp)
                                 }
 
 
@@ -152,14 +151,14 @@ fun SubscriptionScreen(
                 vm.delete(selectedSub!!)
                 showManageDialog = false
                 selectedSub = null
-            }, MarkPaid = { s ->
+            }, markPaid = { s ->
                 val current = parseAnyDate(s.dueDate)
                 if (current != null) {
-                    val next = NextRecurrence(current, s.recurrence)
+                    val next = nextBillingCycle(current, s.recurrence)
                     val updated = s.copy(dueDate = next.format(formatted))
                     vm.update(updated)
                 }
-                showManageDialog = false;
+                showManageDialog = false
                 selectedSub = null
 
             })
@@ -175,7 +174,7 @@ fun ManageDialog(
     onDismiss: () -> Unit,
     onSave: (SubEntity) -> Unit,
     onDelete: () -> Unit,
-    MarkPaid: (SubEntity) -> Unit
+    markPaid: (SubEntity) -> Unit
 ) {
     var editName by remember { mutableStateOf(sub.name) }
     var editAmount by remember { mutableStateOf("%.2f".format(sub.amount / 100.0)) }
@@ -222,7 +221,7 @@ fun ManageDialog(
         }) { Text("Save") }
     }, dismissButton = {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = { MarkPaid(sub) }) { Text("Mark as Paid") }
+            TextButton(onClick = { markPaid(sub) }) { Text("Mark as Paid") }
             TextButton(onClick = onDelete) { Text("Delete") }
         }
     })
