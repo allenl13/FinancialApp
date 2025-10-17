@@ -1,7 +1,5 @@
 package com.example.financialapp.subscriptions
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -19,10 +17,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.dp
 
 @Composable
-fun SearchBar(onSearchChange: (String) -> Unit) {
+fun SearchBar(onSearchChange: (String) -> Unit, modifier: Modifier = Modifier) {
 
     var search by remember { mutableStateOf("") }
 
@@ -44,9 +41,7 @@ fun SearchBar(onSearchChange: (String) -> Unit) {
         },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color(0xFF475D92)
         )

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -79,7 +80,25 @@ fun SubscriptionScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             var search by remember { mutableStateOf("") }
-            SearchBar { newText -> search = newText }
+            var sortBy by remember { mutableStateOf("") }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SearchBar(
+                    onSearchChange = { newText -> search = newText },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                )
+
+                Spacer(Modifier.width(8.dp))
+                SortByDropDown(
+                    selected = sortBy,
+                    onSelected = { sortBy = it }
+                )
+            }
 
             TotalCost(subs)
 
@@ -103,12 +122,21 @@ fun SubscriptionScreen(
                 }
             }
 
+            val sortedSubs = when (sortBy) {
+                "Name (Alphabetical)" -> filteredSubs.sortedBy { it.name.lowercase() }
+                "Due Date (Upcoming)" -> filteredSubs.sortedWith(compareBy({ parseAnyDate(it.dueDate) }))
+                "Amount (High to Low)" -> filteredSubs.sortedByDescending { it.amount }
+                "Amount (Low to High)" -> filteredSubs.sortedBy { it.amount }
+                else -> filteredSubs
+            }
+
+
             if (filteredSubs.isEmpty()) {
                 Spacer(Modifier.height(100.dp))
                 Text("No current subscriptions", fontSize = 20.sp, color = Color.DarkGray)
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(filteredSubs, key = { it.id }) { sub ->
+                    items(sortedSubs, key = { it.id }) { sub ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
