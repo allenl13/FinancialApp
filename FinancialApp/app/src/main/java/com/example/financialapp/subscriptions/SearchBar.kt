@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -32,6 +34,14 @@ fun SearchBar(onSearchChange: (String) -> Unit) {
         },
         placeholder = { Text(" Search for a Subscription ") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search icon") },
+        trailingIcon = {
+            if (search.isNotEmpty()) {
+                IconButton(onClick = {
+                    search = ""
+                    onSearchChange("")
+                }) { Icon(Icons.Default.Close, contentDescription = "Clear icon") }
+            }
+        },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         modifier = Modifier
