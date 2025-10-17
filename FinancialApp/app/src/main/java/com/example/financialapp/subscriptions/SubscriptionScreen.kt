@@ -78,6 +78,9 @@ fun SubscriptionScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            var search by remember { mutableStateOf("") }
+            SearchBar { newText -> search = newText }
+
             TotalCost(subs)
 
             Button(
@@ -89,12 +92,23 @@ fun SubscriptionScreen(
                 Text("Add")
             }
 
-            if (subs.isEmpty()) {
+            val filteredSubs = if (search.isBlank()) {
+                subs
+            } else {
+                subs.filter { sub ->
+                    sub.name.contains(search, ignoreCase = true)
+                            || sub.category.contains(search, ignoreCase = true)
+                            || sub.dueDate.contains(search, ignoreCase = true)
+                            || sub.recurrence.contains(search, ignoreCase = true)
+                }
+            }
+
+            if (filteredSubs.isEmpty()) {
                 Spacer(Modifier.height(100.dp))
                 Text("No current subscriptions", fontSize = 20.sp, color = Color.DarkGray)
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(subs, key = { it.id }) { sub ->
+                    items(filteredSubs, key = { it.id }) { sub ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
