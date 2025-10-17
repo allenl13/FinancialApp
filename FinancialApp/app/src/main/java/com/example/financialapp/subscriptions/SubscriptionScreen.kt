@@ -75,6 +75,8 @@ fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewMode
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            TotalCost(subs)
+
             Button(
                 onClick = { navController.navigate("add") },
                 modifier = Modifier.padding(top = 16.dp), colors = ButtonDefaults.buttonColors(
