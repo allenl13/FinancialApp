@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MenuAnchorType
@@ -29,9 +31,17 @@ fun GoalsListScreen(
     val items by vm.goals.collectAsState()
     val cats by vm.categories.collectAsState()
     val catMap by vm.categoryMap.collectAsState()
+    val sort by vm.sortMode.collectAsState()
+    val query by vm.searchQuery.collectAsState()
+    val selectedCatId by vm.selectedCategoryId.collectAsState()
 
     var showAdd by remember { mutableStateOf(false) }
 
+    // >>> CHANGE: show headers when a category is selected OR when sorting by CATEGORY
+    val groupByCategory = (selectedCatId != null) || (sort == GoalSort.CATEGORY)
+
+    // Group in UI. Since VM already sorts (including by category name for CATEGORY),
+    // this grouping preserves that ordering.
     val grouped = remember(items, catMap) {
         val byCat = items.groupBy { it.categoryId }
         val orderedKeys = byCat.keys.sortedWith(compareBy(nullsLast()) { key ->
@@ -41,35 +51,161 @@ fun GoalsListScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Saving Goals") }) },
-        floatingActionButton = { FloatingActionButton(onClick = { showAdd = true }) { Text("+") } }
-    ) { pad ->
-        if (items.isEmpty()) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .padding(pad),
-                contentAlignment = Alignment.Center
-            ) { Text("No goals yet. Tap + to create one.") }
-        } else {
-            LazyColumn(
-                contentPadding = pad,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                grouped.forEach { (catId, list) ->
-                    val header = catId?.let { catMap[it]?.name } ?: "Uncategorized"
-                    item {
-                        CategoryHeader(
-                            name = header,
-                            colorHex = catId?.let { catMap[it]?.colorHex } ?: "#9E9E9E"
+        topBar = {
+            TopAppBar(
+                title = { Text("Saving Goals") },
+                actions = {
+                    var menuOpen by remember { mutableStateOf(false) }
+
+                    TextButton(onClick = { menuOpen = true }) {
+                        Text(
+                            when (sort) {
+                                GoalSort.DUE_DATE -> "Sort: Due Date"
+                                GoalSort.REMAINING -> "Sort: Remaining"
+                                GoalSort.CATEGORY -> "Sort: Category"
+                            }
                         )
                     }
-                    itemsIndexed(list, key = { _, g -> g.id }) { _, g ->
-                        GoalRow(
-                            item = g,
-                            onClick = { nav.navigate("goal/${g.id}") }
+                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                        DropdownMenuItem(
+                            text = { Text("Sort by Due Date") },
+                            onClick = {
+                                vm.setSort(GoalSort.DUE_DATE)
+                                menuOpen = false
+                            }
                         )
-                        HorizontalDivider()
+                        DropdownMenuItem(
+                            text = { Text("Sort by Remaining") },
+                            onClick = {
+                                vm.setSort(GoalSort.REMAINING)
+                                menuOpen = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Sort by Category") },
+                            onClick = {
+                                vm.setSort(GoalSort.CATEGORY)
+                                menuOpen = false
+                            }
+                        )
+                    }
+                }
+            )
+        },
+        floatingActionButton = { FloatingActionButton(onClick = { showAdd = true }) { Text("+") } }
+    ) { pad ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(pad)
+        ) {
+            // --- Search box ---
+            OutlinedTextField(
+                value = query,
+                onValueChange = vm::setSearch,
+                label = { Text("Search goals") },
+                singleLine = true,
+                trailingIcon = {
+                    if (query.isNotBlank()) {
+                        IconButton(onClick = vm::clearSearch) {
+                            Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear")
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            )
+
+            // --- Category filter dropdown (All + categories) ---
+            var expanded by remember { mutableStateOf(false) }
+            val allOption = CategoryMiniUi(-1L, "All", "#9E9E9E")
+            val currentLabel = when (val id = selectedCatId) {
+                null -> allOption.name
+                else -> cats.firstOrNull { it.id == id }?.name ?: allOption.name
+            }
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true)
+                        .fillMaxWidth(),
+                    readOnly = true,
+                    value = currentLabel,
+                    onValueChange = {},
+                    label = { Text("Category") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(allOption.name) },
+                        onClick = {
+                            vm.setCategoryFilter(null) // All
+                            expanded = false
+                        }
+                    )
+                    cats.forEach { c ->
+                        DropdownMenuItem(
+                            text = { Text(c.name) },
+                            onClick = {
+                                vm.setCategoryFilter(c.id)
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            if (items.isEmpty()) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val emptyMsg =
+                        if (query.isNotBlank() && selectedCatId != null)
+                            "No results for “$query” in this category."
+                        else if (query.isNotBlank())
+                            "No results for “$query”."
+                        else if (selectedCatId != null)
+                            "No goals in this category."
+                        else
+                            "No goals yet. Tap + to create one."
+                    Text(emptyMsg)
+                }
+            } else {
+                LazyColumn(Modifier.fillMaxSize()) {
+                    if (groupByCategory) {
+                        grouped.forEach { (catId, list) ->
+                            val header = catId?.let { catMap[it]?.name } ?: "Uncategorized"
+                            item {
+                                CategoryHeader(
+                                    name = header,
+                                    colorHex = catId?.let { catMap[it]?.colorHex } ?: "#9E9E9E"
+                                )
+                            }
+                            itemsIndexed(list, key = { _, g -> g.id }) { _, g ->
+                                GoalRow(item = g, onClick = { nav.navigate("goal/${g.id}") })
+                                HorizontalDivider()
+                            }
+                        }
+                    } else {
+                        itemsIndexed(items, key = { _, g -> g.id }) { _, g ->
+                            GoalRow(item = g, onClick = { nav.navigate("goal/${g.id}") })
+                            HorizontalDivider()
+                        }
                     }
                 }
             }
@@ -84,7 +220,6 @@ fun GoalsListScreen(
             showAdd = false
         },
         onCreateCategory = { n, hex ->
-            // calls VM to create and returns new id
             vm.createCategory(n, hex)
         }
     )
@@ -167,7 +302,6 @@ private fun AddGoalDialog(
                     label = { Text("Due date (DD/MM/YYYY, optional)") }
                 )
 
-                // Category dropdown with "New category..."
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -231,10 +365,7 @@ private fun AddGoalDialog(
             onConfirm = { n, hex ->
                 scope.launch {
                     val newId = onCreateCategory(n, hex)
-                    if (newId != null) {
-                        // Immediately select the new category
-                        selected = CategoryMiniUi(newId, n.trim(), hex)
-                    }
+                    if (newId != null) selected = CategoryMiniUi(newId, n.trim(), hex)
                     showNewCat = false
                 }
             }
