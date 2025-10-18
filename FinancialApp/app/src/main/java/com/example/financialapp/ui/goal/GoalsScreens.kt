@@ -34,14 +34,13 @@ fun GoalsListScreen(
     val sort by vm.sortMode.collectAsState()
     val query by vm.searchQuery.collectAsState()
     val selectedCatId by vm.selectedCategoryId.collectAsState()
+    val showCompleted by vm.showCompletedOnly.collectAsState()
 
     var showAdd by remember { mutableStateOf(false) }
 
-    // >>> CHANGE: show headers when a category is selected OR when sorting by CATEGORY
+    // Show headers when a category is selected OR when sorting by CATEGORY
     val groupByCategory = (selectedCatId != null) || (sort == GoalSort.CATEGORY)
 
-    // Group in UI. Since VM already sorts (including by category name for CATEGORY),
-    // this grouping preserves that ordering.
     val grouped = remember(items, catMap) {
         val byCat = items.groupBy { it.categoryId }
         val orderedKeys = byCat.keys.sortedWith(compareBy(nullsLast()) { key ->
@@ -69,24 +68,15 @@ fun GoalsListScreen(
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         DropdownMenuItem(
                             text = { Text("Sort by Due Date") },
-                            onClick = {
-                                vm.setSort(GoalSort.DUE_DATE)
-                                menuOpen = false
-                            }
+                            onClick = { vm.setSort(GoalSort.DUE_DATE); menuOpen = false }
                         )
                         DropdownMenuItem(
                             text = { Text("Sort by Remaining") },
-                            onClick = {
-                                vm.setSort(GoalSort.REMAINING)
-                                menuOpen = false
-                            }
+                            onClick = { vm.setSort(GoalSort.REMAINING); menuOpen = false }
                         )
                         DropdownMenuItem(
                             text = { Text("Sort by Category") },
-                            onClick = {
-                                vm.setSort(GoalSort.CATEGORY)
-                                menuOpen = false
-                            }
+                            onClick = { vm.setSort(GoalSort.CATEGORY); menuOpen = false }
                         )
                     }
                 }
@@ -99,7 +89,7 @@ fun GoalsListScreen(
                 .fillMaxSize()
                 .padding(pad)
         ) {
-            // --- Search box ---
+            // --- Search ---
             OutlinedTextField(
                 value = query,
                 onValueChange = vm::setSearch,
@@ -117,8 +107,8 @@ fun GoalsListScreen(
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             )
 
-            // --- Category filter dropdown (All + categories) ---
-            var expanded by remember { mutableStateOf(false) }
+            // --- Category filter (All + categories) ---
+            var catExpanded by remember { mutableStateOf(false) }
             val allOption = CategoryMiniUi(-1L, "All", "#9E9E9E")
             val currentLabel = when (val id = selectedCatId) {
                 null -> allOption.name
@@ -126,8 +116,8 @@ fun GoalsListScreen(
             }
 
             ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded },
+                expanded = catExpanded,
+                onExpandedChange = { catExpanded = !catExpanded },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -140,32 +130,36 @@ fun GoalsListScreen(
                     value = currentLabel,
                     onValueChange = {},
                     label = { Text("Category") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = catExpanded) }
                 )
                 ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    expanded = catExpanded,
+                    onDismissRequest = { catExpanded = false }
                 ) {
                     DropdownMenuItem(
                         text = { Text(allOption.name) },
-                        onClick = {
-                            vm.setCategoryFilter(null) // All
-                            expanded = false
-                        }
+                        onClick = { vm.setCategoryFilter(null); catExpanded = false }
                     )
                     cats.forEach { c ->
                         DropdownMenuItem(
                             text = { Text(c.name) },
-                            onClick = {
-                                vm.setCategoryFilter(c.id)
-                                expanded = false
-                            }
+                            onClick = { vm.setCategoryFilter(c.id); catExpanded = false }
                         )
                     }
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
+            // --- Show Completed toggle ---
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Show Completed", style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.weight(1f))
+                Switch(checked = showCompleted, onCheckedChange = vm::setShowCompletedOnly)
+            }
 
             if (items.isEmpty()) {
                 Box(
@@ -175,7 +169,9 @@ fun GoalsListScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     val emptyMsg =
-                        if (query.isNotBlank() && selectedCatId != null)
+                        if (showCompleted && query.isBlank() && selectedCatId == null)
+                            "No completed goals yet."
+                        else if (query.isNotBlank() && selectedCatId != null)
                             "No results for “$query” in this category."
                         else if (query.isNotBlank())
                             "No results for “$query”."

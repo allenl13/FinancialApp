@@ -54,6 +54,11 @@ class GoalsListViewModel(app: Application) : AndroidViewModel(app) {
     val selectedCategoryId: StateFlow<Long?> = _selectedCategoryId
     fun setCategoryFilter(id: Long?) { _selectedCategoryId.value = id }
 
+    // --- Completed-only toggle ---
+    private val _showCompletedOnly = MutableStateFlow(false)
+    val showCompletedOnly: StateFlow<Boolean> = _showCompletedOnly
+    fun setShowCompletedOnly(only: Boolean) { _showCompletedOnly.value = only }
+
     // --- Categories (for labels & sorting by category name) ---
     val categories: StateFlow<List<CategoryMiniUi>> =
         catDao.observeAll()
@@ -64,7 +69,7 @@ class GoalsListViewModel(app: Application) : AndroidViewModel(app) {
         categories.map { it.associateBy { c -> c.id } }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
-    // --- Goals stream: search -> category filter -> sort (uses catMap when needed) ---
+    // --- Goals stream: search -> category filter -> completed filter -> sort ---
     val goals: StateFlow<List<GoalListItemUi>> =
         repo.observeAll()
             .map { list -> list.map { it.toUi() } }
@@ -75,6 +80,9 @@ class GoalsListViewModel(app: Application) : AndroidViewModel(app) {
             }
             .combine(_selectedCategoryId) { list, catId ->
                 if (catId == null) list else list.filter { it.categoryId == catId }
+            }
+            .combine(_showCompletedOnly) { list, only ->
+                if (!only) list else list.filter { it.saved + 1e-9 >= it.target }
             }
             .combine(categoryMap) { list, catMap -> list to catMap }
             .combine(_sortMode) { (list, catMap), mode ->
@@ -91,8 +99,8 @@ class GoalsListViewModel(app: Application) : AndroidViewModel(app) {
                     GoalSort.CATEGORY -> list.sortedWith(
                         compareBy<GoalListItemUi>(
                             { it.categoryId == null },                                                 // nulls last
-                            { catMap[it.categoryId]?.name?.lowercase() ?: "" },                        // by category name
-                            { it.name.lowercase() }                                                    // then goal name
+                            { catMap[it.categoryId]?.name?.lowercase() ?: "" },                        // category name
+                            { it.name.lowercase() }                                                    // goal name
                         )
                     )
                 }
