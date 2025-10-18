@@ -37,7 +37,6 @@ import com.example.financialapp.data.Transaction
 import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.notifications.EnsureSubNotificationsReady
 import com.example.financialapp.subscriptions.MainSub
-import com.example.financialapp.ui.category.CategoryListScreen
 import com.example.financialapp.ui.goal.GoalDetailScreen
 import com.example.financialapp.ui.goal.GoalsListScreen
 import com.example.financialapp.ui.settings.SettingsScreen
@@ -99,7 +98,7 @@ class MainActivity : ComponentActivity() {
                     navController = nav,
                     startDestination = "login"
                 ) {
-                  
+
                     composable("main") {
                         MainScreen(
                             onCardClick = { nav.navigate("wallet") },
@@ -110,34 +109,33 @@ class MainActivity : ComponentActivity() {
                             onGoalsClick  = { nav.navigate("goals") },
                             onSettingsClick = { nav.navigate("settings") },
                             onChatClick = { nav.navigate("chatpage") },
-                            onCategoryClick= { nav.navigate("categories") },
+                            onCategoryClick = { /* no-op: categories removed */ },   // ← add this line
                             onLogoutClick = {
-                                authvm.signout()  // <-- actually sign out (Firebase)
+                                authvm.signout()
                                 nav.navigate("login") {
-                                    popUpTo(nav.graph.startDestinationId) {
-                                        inclusive = true
-                                    } // clear stack
+                                    popUpTo(nav.graph.startDestinationId) { inclusive = true }
                                     launchSingleTop = true
                                     restoreState = false
                                 }
                             },
                         ) { nav.navigate("login") }
+
                     }
-                    
+
                     composable("convert") {
                         // Activity-scoped VM so it survives recompositions & navigation
                         ConvertPage(
                             ViewModelProvider(this@MainActivity)[ConvertViewModel::class.java]
                         )
                     }
-                    
+
                     composable("invest") {
                         // Provide repo via factory (needs Context)
                         val ctx = LocalContext.current
                         val vm: InvestViewModel = viewModel(factory = InvestVMFactory(ctx))
                         InvestPage(viewModel = vm)
                     }
-                    
+
                     composable("goals") {
                         GoalsListScreen(nav)   // list screen
                     }
@@ -205,11 +203,6 @@ class MainActivity : ComponentActivity() {
                             vm = authvm,
                             onBackToLogin = { nav.popBackStack("login", inclusive = false) }
                         )
-                    }
-
-                    //categories page
-                    composable("categories"){
-                        CategoryListScreen()
                     }
 
                     // add wallet

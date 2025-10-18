@@ -15,8 +15,7 @@ import kotlinx.coroutines.launch
 data class CategoryUi(
     val id: Long,
     val name: String,
-    val colorHex: String,
-    val goal: Double
+    val colorHex: String
 )
 
 class SavingCategoryViewModel(app: Application) : AndroidViewModel(app) {
@@ -30,17 +29,12 @@ class SavingCategoryViewModel(app: Application) : AndroidViewModel(app) {
             .map { list -> list.map { it.toUi() } }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    fun create(name: String, colorHex: String, goalText: String) = viewModelScope.launch {
-        val g = goalText.toDoubleOrNull() ?: 0.0
-        if (name.isNotBlank()) repo.create(name.trim(), colorHex, g)
-    }
-
-    fun updateGoal(id: Long, goalText: String) = viewModelScope.launch {
-        val g = goalText.toDoubleOrNull() ?: return@launch
-        repo.updateGoal(id, g)
+    /** Create a category without any goal amount. */
+    fun create(name: String, colorHex: String) = viewModelScope.launch {
+        if (name.isNotBlank()) repo.create(name.trim(), colorHex)
     }
 
     private fun SavingCategory.toUi() = CategoryUi(
-        id = id, name = name, colorHex = colorHex, goal = goalAmount
+        id = id, name = name, colorHex = colorHex
     )
 }
