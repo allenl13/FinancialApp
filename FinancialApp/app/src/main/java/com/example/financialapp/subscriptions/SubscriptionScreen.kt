@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -46,11 +47,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlin.math.roundToInt
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewModel(), back: () -> Unit) {
+fun SubscriptionScreen(
+    navController: NavController,
+    vm: SubViewModel = viewModel(),
+    back: () -> Unit
+) {
     val subs by vm.readAllData.observeAsState(emptyList())
     var showManageDialog by remember { mutableStateOf(false) }
     var selectedSub by remember { mutableStateOf<SubEntity?>(null) }
@@ -75,6 +79,29 @@ fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewMode
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            var search by remember { mutableStateOf("") }
+            var sortBy by remember { mutableStateOf("") }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SearchBar(
+                    onSearchChange = { newText -> search = newText },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                )
+
+                Spacer(Modifier.width(8.dp))
+                SortByDropDown(
+                    selected = sortBy,
+                    onSelected = { sortBy = it }
+                )
+            }
+
+            TotalCost(subs)
+
             Button(
                 onClick = { navController.navigate("add") },
                 modifier = Modifier.padding(top = 16.dp), colors = ButtonDefaults.buttonColors(
@@ -84,12 +111,32 @@ fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewMode
                 Text("Add")
             }
 
-            if (subs.isEmpty()) {
+            val filteredSubs = if (search.isBlank()) {
+                subs
+            } else {
+                subs.filter { sub ->
+                    sub.name.contains(search, ignoreCase = true)
+                            || sub.category.contains(search, ignoreCase = true)
+                            || sub.dueDate.contains(search, ignoreCase = true)
+                            || sub.recurrence.contains(search, ignoreCase = true)
+                }
+            }
+
+            val sortedSubs = when (sortBy) {
+                "Name (Alphabetical)" -> filteredSubs.sortedBy { it.name.lowercase() }
+                "Due Date (Upcoming)" -> filteredSubs.sortedWith(compareBy({ parseAnyDate(it.dueDate) }))
+                "Amount (High to Low)" -> filteredSubs.sortedByDescending { it.amount }
+                "Amount (Low to High)" -> filteredSubs.sortedBy { it.amount }
+                else -> filteredSubs
+            }
+
+
+            if (filteredSubs.isEmpty()) {
                 Spacer(Modifier.height(100.dp))
                 Text("No current subscriptions", fontSize = 20.sp, color = Color.DarkGray)
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(subs, key = { it.id }) { sub ->
+                    items(sortedSubs, key = { it.id }) { sub ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -111,7 +158,7 @@ fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewMode
                                         "$" + "%.2f".format(sub.amount / 100.0) + " / ${sub.recurrence}",
                                         fontSize = 16.sp
                                     )
-                                    Text("${sub.category}", fontSize = 16.sp)
+                                    Text(sub.category, fontSize = 16.sp)
                                 }
 
 
@@ -146,6 +193,16 @@ fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewMode
                 vm.delete(selectedSub!!)
                 showManageDialog = false
                 selectedSub = null
+            }, markPaid = { s ->
+                val current = parseAnyDate(s.dueDate)
+                if (current != null) {
+                    val next = nextBillingCycle(current, s.recurrence)
+                    val updated = s.copy(dueDate = next.format(formatted))
+                    vm.update(updated)
+                }
+                showManageDialog = false
+                selectedSub = null
+
             })
         }
     }
@@ -155,7 +212,11 @@ fun SubscriptionScreen(navController: NavController, vm: SubViewModel = viewMode
 
 @Composable
 fun ManageDialog(
-    sub: SubEntity, onDismiss: () -> Unit, onSave: (SubEntity) -> Unit, onDelete: () -> Unit
+    sub: SubEntity,
+    onDismiss: () -> Unit,
+    onSave: (SubEntity) -> Unit,
+    onDelete: () -> Unit,
+    markPaid: (SubEntity) -> Unit
 ) {
     var editName by remember { mutableStateOf(sub.name) }
     var editAmount by remember { mutableStateOf("%.2f".format(sub.amount / 100.0)) }
@@ -202,6 +263,7 @@ fun ManageDialog(
         }) { Text("Save") }
     }, dismissButton = {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextButton(onClick = { markPaid(sub) }) { Text("Mark as Paid") }
             TextButton(onClick = onDelete) { Text("Delete") }
         }
     })
