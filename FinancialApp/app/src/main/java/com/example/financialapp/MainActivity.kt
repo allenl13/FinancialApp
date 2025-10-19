@@ -46,6 +46,7 @@ import com.example.financialapp.ui.theme.ThemeViewModel
 import com.example.financialapp.ui.transactions.TransactionsViewModel
 import com.example.financialapp.repo.MainViewModel
 import com.example.financialapp.wallet.AddCardScreen
+import com.example.financialapp.wallet.CardDetailScreen
 import com.example.financialapp.wallet.WalletHome
 import com.example.financialapp.wallet.WalletListViewModel
 
@@ -111,6 +112,8 @@ class MainActivity : ComponentActivity() {
                             onSettingsClick = { nav.navigate("settings") },
                             onChatClick = { nav.navigate("chatpage") },
                             onCategoryClick= { nav.navigate("categories") },
+                            onCardsClick = { id -> nav.navigate("card/$id") },
+                            walletVm = walletVm,
                             onLogoutClick = {
                                 authvm.signout()  // <-- actually sign out (Firebase)
                                 nav.navigate("login") {
@@ -217,10 +220,24 @@ class MainActivity : ComponentActivity() {
                         nav,
                         expenses = viewModel<MainViewModel>().loadData(),
                     ) }
-                    composable("addCard") { AddCardScreen(
-                        onDone = { nav.popBackStack() },
-                        vm = walletVm
-                    ) }
+
+                    composable("addCard") {
+                        AddCardScreen(
+                            onDone = { nav.popBackStack() },
+                            vm = walletVm
+                        )
+                    }
+
+                    // Card list screen
+                    composable(
+                        route = "card/{cardId}",
+                        arguments = listOf(navArgument("cardId") { type = NavType.LongType })
+                    ) {
+                        val id = it.arguments?.getLong("cardId") ?: return@composable
+                        CardDetailScreen(nav = nav, cardId = id, vm = walletVm)
+                    }
+
+
                 }
             }
         }

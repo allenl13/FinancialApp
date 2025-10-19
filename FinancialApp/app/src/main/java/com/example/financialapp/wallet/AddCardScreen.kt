@@ -73,3 +73,34 @@ fun AddCardDialog (
         }
     )
 }
+
+@Composable
+fun EditCardDialog(
+    card: WalletCard,
+    onDismiss: () -> Unit,
+    onConfirm: (name: String, network: String, last4: String, expire: String) -> Unit
+) {
+    var name by remember { mutableStateOf(card.name) }
+    var network by remember { mutableStateOf(card.network) }
+    var last4 by remember { mutableStateOf(card.last4) }
+    var expire by remember { mutableStateOf(card.expire) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Edit Card") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(name,    { name = it },    label = { Text("Card nickname") })
+                OutlinedTextField(network, { network = it }, label = { Text("Network (Visa/Mastercard)") })
+                OutlinedTextField(last4,   { last4 = it },   label = { Text("Last 4") })
+                OutlinedTextField(expire,  { expire = it },  label = { Text("Expiry (MM/YY)") })
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(name, network, last4, expire) }) { Text("Save") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
