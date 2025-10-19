@@ -39,7 +39,7 @@ fun CardDetailScreen(
     cardId: Long,
     vm: WalletListViewModel = viewModel()
 ) {
-    val card by vm.observeById(cardId).collectAsState()
+    val card by vm.observeById(cardId).collectAsState(initial = null)
     var menuOpen by remember { mutableStateOf(false) }
     var showEdit by remember { mutableStateOf(false) }
     var showDelete by remember { mutableStateOf(false) }
