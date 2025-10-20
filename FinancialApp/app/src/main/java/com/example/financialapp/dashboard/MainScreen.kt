@@ -110,7 +110,7 @@ fun MainScreen(
                 when (itemId) {
                     R.id.chatBot -> onChatClick()
                     R.id.settings -> onSettingsClick()
-                    R.id.categories -> onCategoryClick()
+                    //R.id.categories -> onCategoryClick()
                     R.id.logout -> onLogoutClick()
                 }
             }

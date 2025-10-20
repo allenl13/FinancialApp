@@ -35,20 +35,20 @@ fun ButtonNavBar (
             unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
             indicatorColor      = MaterialTheme.colorScheme.secondaryContainer
         )
-        NavigationBarItem(
-            selected = true,
-            onClick = { onItemSelected(R.id.categories) },
-            icon = {
-                Icon(painter = painterResource(R.drawable.btn_3), contentDescription = null)
-                   },
-            label = {
-                Text(
-                    text = "Saving Categories",
-                    fontSize = 10.sp
-                )
-            },
-            colors = itemColors
-        )
+//        NavigationBarItem(
+//            selected = true,
+//            onClick = { onItemSelected(R.id.categories) },
+//            icon = {
+//                Icon(painter = painterResource(R.drawable.btn_3), contentDescription = null)
+//                   },
+//            label = {
+//                Text(
+//                    text = "Saving Categories",
+//                    fontSize = 10.sp
+//                )
+//            },
+//            colors = itemColors
+//        )
         NavigationBarItem(
             selected = true,
             onClick = { onItemSelected(R.id.chatBot) },

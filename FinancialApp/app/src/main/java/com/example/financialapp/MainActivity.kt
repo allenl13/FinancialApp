@@ -51,7 +51,7 @@ import com.example.financialapp.wallet.CardDetailScreen
 import com.example.financialapp.wallet.WalletHome
 import com.example.financialapp.wallet.WalletListViewModel
 // If your categories screen lives elsewhere, adjust this import:
-import com.example.financialapp.ui.categories.CategoryListScreen
+import com.example.financialapp.ui.category.CategoryListScreen
 
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
