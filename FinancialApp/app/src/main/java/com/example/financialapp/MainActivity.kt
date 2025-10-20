@@ -3,20 +3,13 @@ package com.example.financialapp
 // Feature pages (use the correct package names)
 
 
-import android.R.attr.mode
-import android.R.id.primary
-import android.content.Context
+
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,13 +30,11 @@ import com.example.financialapp.Investment.InvestPage
 import com.example.financialapp.Investment.InvestVMFactory
 import com.example.financialapp.Investment.InvestViewModel
 import com.example.financialapp.Login.AuthViewModel
-import com.example.financialapp.Login.MyAppNavigation
 import com.example.financialapp.Login.pages.ForgotPassword
 import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.Login.pages.SignupPage
 import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.data.Transaction
-import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.notifications.EnsureSubNotificationsReady
 import com.example.financialapp.subscriptions.MainSub
@@ -55,8 +46,8 @@ import com.example.financialapp.ui.theme.AppThemeExt
 import com.example.financialapp.ui.theme.ThemeViewModel
 import com.example.financialapp.ui.transactions.TransactionsViewModel
 import com.example.financialapp.repo.MainViewModel
-import com.example.financialapp.ui.theme.FinancialAppTheme
-import com.example.financialapp.ui.theme.ThemeMode
+
+
 
 
 class MainActivity : ComponentActivity() {
@@ -107,7 +98,7 @@ class MainActivity : ComponentActivity() {
                     navController = nav,
                     startDestination = "login"
                 ) {
-                  
+
                     composable("main") {
                         MainScreen(
                             expenses = mainViewModel.loadData(),
@@ -119,7 +110,7 @@ class MainActivity : ComponentActivity() {
                             onCategoryClick= { nav.navigate("categories") },
                             onChatClick = { nav.navigate("chatpage") },
                             onLogoutClick = {
-                                authvm.signout()  // <-- actually sign out (Firebase)
+                                authvm.signout()
                                 nav.navigate("login") {
                                     popUpTo(nav.graph.startDestinationId) {
                                         inclusive = true
@@ -130,21 +121,21 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-                    
+
                     composable("convert") {
                         // Activity-scoped VM so it survives recompositions & navigation
                         ConvertPage(
                             ViewModelProvider(this@MainActivity)[ConvertViewModel::class.java]
                         )
                     }
-                    
+
                     composable("invest") {
                         // Provide repo via factory (needs Context)
                         val ctx = LocalContext.current
                         val vm: InvestViewModel = viewModel(factory = InvestVMFactory(ctx))
                         InvestPage(viewModel = vm)
                     }
-                    
+
                     composable("goals") {
                         GoalsListScreen(nav)   // list screen
                     }

@@ -1,56 +1,72 @@
 package com.example.financialapp.Login
 
-import androidx.activity.viewModels
-import com.example.financialapp.Login.pages.ForgotPassword
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
-//use for homepage
-//import com.example.financialapp.Login.pages.HomePage
-
+import com.example.financialapp.Login.pages.ForgotPassword
 import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.Login.pages.SignupPage
 import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.repo.MainViewModel
-import kotlin.getValue
+import com.example.financialapp.ui.settings.BackgroundFixedViewModel
 
-//login/signup/forgor navigation
+/**
+ * Auth navigation (login / signup / forgot) + simple main route.
+ * NOTE:
+ * - bgVm is injected from the caller (e.g., MainActivity) so MainScreen shares the same instance
+ *   with SettingsScreen and background changes apply instantly.
+ */
 @Composable
-fun MyAppNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) {
+fun MyAppNavigation(
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel,
+    bgVm: BackgroundFixedViewModel
+) {
     val nav = rememberNavController()
 
-    NavHost(navController = nav, startDestination = "login", builder = {
-        composable("login"){
-            LoginPage(modifier,nav,authViewModel)
+    NavHost(navController = nav, startDestination = "login") {
+
+        composable("login") {
+            LoginPage(
+                modifier = modifier,
+                navController = nav,
+                authViewModel = authViewModel
+            )
         }
-        composable("signup"){
-            SignupPage(modifier,nav,authViewModel)
+
+        composable("signup") {
+            SignupPage(
+                modifier = modifier,
+                navController = nav,
+                authViewModel = authViewModel
+            )
         }
-        //use for our home page
+
+        // Home (simple) – uses the same bgVm instance
         composable("main") {
             val mainViewModel: MainViewModel = viewModel()
             MainScreen(
                 expenses = mainViewModel.loadData(),
                 onConvertClick = { nav.navigate("convert") },
-                onInvestClick = { nav.navigate("invest") },
-                onSubsClick   = { nav.navigate("subscriptions") },
-                onGoalsClick  = { nav.navigate("goals") },
+                onInvestClick  = { nav.navigate("invest") },
+                onSubsClick    = { nav.navigate("subscriptions") },
+                onGoalsClick   = { nav.navigate("goals") },
                 onSettingsClick = { nav.navigate("settings") },
-                onCategoryClick= { nav.navigate("categories") },
-                onChatClick = { nav.navigate("chatpage") },
-                onLogoutClick = { nav.navigate("login") }
+                onCategoryClick = { nav.navigate("categories") },
+                onChatClick     = { nav.navigate("chatpage") },
+                onLogoutClick   = { nav.navigate("login") },
+                bgVm = bgVm
             )
         }
-        composable("forgot")
-        {
+
+        composable("forgot") {
             ForgotPassword(
                 vm = authViewModel,
-                onBackToLogin = {nav.popBackStack("login", inclusive = false)}
+                onBackToLogin = { nav.popBackStack("login", inclusive = false) }
             )
         }
-    })
+    }
 }
