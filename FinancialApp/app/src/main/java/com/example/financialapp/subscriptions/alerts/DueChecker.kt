@@ -1,8 +1,9 @@
-// com/example/financialapp/subscriptions/alerts/DueSubscriptionsWorker.kt
 package com.example.financialapp.subscriptions.alerts
 
 import android.Manifest
+//noinspection SuspiciousImport
 import android.R
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -11,6 +12,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.edit
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.financialapp.MainActivity
@@ -29,10 +31,13 @@ class DueChecker(
 
     private val dao = SubDatabase.getDatabase(appContext).subDao()
     private val prefs = appContext.getSharedPreferences("subs_alerts", Context.MODE_PRIVATE)
+
     @RequiresApi(Build.VERSION_CODES.O)
     private val zone: ZoneId = ZoneId.systemDefault()
+
     @RequiresApi(Build.VERSION_CODES.O)
     private val iso = DateTimeFormatter.ISO_LOCAL_DATE
+
     @RequiresApi(Build.VERSION_CODES.O)
     private val displayDate = DateTimeFormatter.ofPattern("dd MMM yyyy")
 
@@ -62,18 +67,19 @@ class DueChecker(
 
             if (withinWindow && notAlertedToday) {
                 notifyDue(s, dueLocal)
-                prefs.edit().putLong(key, todayEpochDay).apply()
+                prefs.edit { putLong(key, todayEpochDay) }
             }
         }
         return Result.success()
     }
 
+    @SuppressLint("DefaultLocale")
     private fun formatAmount(cents: Int): String {
         val dollars = cents / 100.0
         return "$" + String.format("%.2f", dollars)
     }
 
-        @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.O)
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun notifyDue(sub: SubEntity, due: LocalDate) {
         val ctx = applicationContext

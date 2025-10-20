@@ -1,17 +1,34 @@
 package com.example.financialapp.Login
 
+import android.app.Activity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.Firebase
+import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuthMultiFactorException
+import com.google.firebase.auth.MultiFactorResolver
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.auth.PhoneMultiFactorGenerator
+import com.google.firebase.auth.PhoneMultiFactorInfo
 import com.google.firebase.firestore.firestore
+import java.util.concurrent.TimeUnit
 
 class AuthViewModel : ViewModel() {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val db = Firebase.firestore
+
+    //MFA
+    private var mfaResolver: MultiFactorResolver? = null
+    private var verificationId: String? = null
+
+    private val _mfaState = MutableLiveData<String>()
+    val mfaState: LiveData<String> = _mfaState
 
     private val _authState = MutableLiveData<AuthState>()
     val authState: LiveData<AuthState> = _authState
@@ -46,8 +63,15 @@ class AuthViewModel : ViewModel() {
                     _authState.value = AuthState.Authenticated
                     loadUserProfile()
                 } else {
-                    _authState.value =
-                        AuthState.Error(task.exception?.message ?: "Something went wrong")
+                    val ex = task.exception
+                    if (ex is FirebaseAuthMultiFactorException) {
+                        ///mfa challenge
+                        mfaResolver = ex.resolver
+                        _mfaState.value = "MFA_REQUIRED"
+                    } else {
+                        _authState.value =
+                            AuthState.Error(ex?.message ?: "Something went wrong")
+                    }
                 }
             }
     }
@@ -138,6 +162,133 @@ class AuthViewModel : ViewModel() {
     fun clearResetState() {
         _resetState.value = ResetState.Idle
     }
+
+    fun needsMfaEnrollment(): Boolean =
+        FirebaseAuth.getInstance().currentUser?.multiFactor?.enrolledFactors?.isEmpty() == true
+
+    // Start SMS 2FA ENROLLMENT (sends code to the phone entered on AddMFA page)
+    fun startMfaEnrollment(phoneE164: String, activity: Activity) {
+        val mfa = FirebaseAuth.getInstance().currentUser?.multiFactor
+            ?: run { _mfaState.postValue("MFA_ERROR: Not signed in"); return }
+
+        _mfaState.postValue("ENROLL_SENDING")
+
+        val options = PhoneAuthOptions.newBuilder()
+            .setPhoneNumber(phoneE164)               // e.g. +15555550100 (test number)
+            .setTimeout(60L, TimeUnit.SECONDS)
+            .setActivity(activity)
+            .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                override fun onVerificationCompleted(cred: PhoneAuthCredential) {
+                    // Instant/auto verify path
+                    val assertion = PhoneMultiFactorGenerator.getAssertion(cred)
+                    mfa.enroll(assertion, "My phone")
+                        .addOnSuccessListener { _mfaState.postValue("ENROLL_SUCCESS") }
+                        .addOnFailureListener { e -> _mfaState.postValue("MFA_ERROR: ${e.message}") }
+                }
+                override fun onVerificationFailed(e: FirebaseException) {
+                    _mfaState.postValue("MFA_ERROR: ${e.message}")
+                }
+                override fun onCodeSent(vid: String, token: PhoneAuthProvider.ForceResendingToken) {
+                    verificationId = vid
+                    _mfaState.postValue("ENROLL_CODE_SENT")
+                }
+            })
+            .build()
+
+        PhoneAuthProvider.verifyPhoneNumber(options)
+    }
+
+    // Finish ENROLLMENT after the user types the code on AddMFA page
+    fun finalizeMfaEnrollment(code: String) {
+        val mfa = FirebaseAuth.getInstance().currentUser?.multiFactor
+            ?: run { _mfaState.postValue("MFA_ERROR: Not signed in"); return }
+        val vid = verificationId
+            ?: run { _mfaState.postValue("MFA_ERROR: No verificationId"); return }
+
+        val cred = PhoneAuthProvider.getCredential(vid, code)
+        val assertion = PhoneMultiFactorGenerator.getAssertion(cred)
+        _mfaState.postValue("ENROLLING")
+        mfa.enroll(assertion, "My phone")
+            .addOnSuccessListener { _mfaState.postValue("ENROLL_SUCCESS") }
+            .addOnFailureListener { e -> _mfaState.postValue("MFA_ERROR: ${e.message}") }
+    }
+
+    fun startMfaChallenge(activity: Activity) {
+        val resolver = mfaResolver ?: run {
+            _mfaState.value = "MFA_ERROR: No resolver"
+            return
+        }
+
+        val phoneInfo = resolver.hints.firstOrNull() as? PhoneMultiFactorInfo ?: run {
+            _mfaState.value = "MFA_ERROR: No phone factor"
+            return
+        }
+
+        // Start SMS verification for this user's enrolled phone factor
+        _mfaState.value = "MFA_SENDING_CODE"
+
+        val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+            override fun onVerificationCompleted(cred: PhoneAuthCredential) {
+                // Auto verification path
+                finishMfaSignIn(cred)
+            }
+
+            override fun onVerificationFailed(e: FirebaseException) {
+                _mfaState.value = "MFA_ERROR: ${e.message}"
+            }
+
+            override fun onCodeSent(
+                vid: String,
+                token: PhoneAuthProvider.ForceResendingToken
+            ) {
+                verificationId = vid
+                _mfaState.value = "MFA_CODE_SENT"
+            }
+        }
+
+        // Newer Firebase SDKs don’t use setPhoneMultiFactorInfo() — use this static helper
+        PhoneAuthProvider.verifyPhoneNumber(
+            PhoneAuthOptions.newBuilder()
+                .setActivity(activity)
+                .setMultiFactorSession(resolver.session)
+                .setPhoneNumber(phoneInfo.phoneNumber!!)
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setCallbacks(callbacks)
+                .build()
+        )
+    }
+    // verify mfa code
+    fun verifyMfaCode(code: String) {
+        val vid = verificationId ?: run {
+            _mfaState.value = "MFA_ERROR: No verification in progress"
+            return
+        }
+        val cred = PhoneAuthProvider.getCredential(vid, code)
+        finishMfaSignIn(cred) // ✅
+    }
+
+    // ✅ Finish the MFA sign-in using the built credential
+    private fun finishMfaSignIn(cred: PhoneAuthCredential) {
+        val resolver = mfaResolver ?: run {
+            _mfaState.value = "MFA_ERROR: No resolver"
+            return
+        }
+        val assertion = PhoneMultiFactorGenerator.getAssertion(cred)
+        _mfaState.value = "MFA_VERIFYING"
+
+        resolver.resolveSignIn(assertion)
+            .addOnSuccessListener {
+                mfaResolver = null
+                verificationId = null
+                _mfaState.value = "MFA_SUCCESS"
+                _authState.value = AuthState.Authenticated
+                loadUserProfile()
+            }
+            .addOnFailureListener { e ->
+                _mfaState.value = "MFA_ERROR: ${e.message}"
+            }
+    }
+
 }
 
 // forgot password UI states
@@ -165,3 +316,4 @@ data class UserProfile(
     val displayName: String = "",
     val createdAt: Long = 0L
 )
+
