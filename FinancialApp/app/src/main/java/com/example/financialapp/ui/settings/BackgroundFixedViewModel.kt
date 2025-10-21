@@ -39,8 +39,12 @@ class BackgroundFixedViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Apply and persist */
     fun applyTemp() = viewModelScope.launch {
-        _tempChoice.value?.let { chosen ->
-            _selected.value = chosen
+        val chosen = _tempChoice.value
+        _selected.value = chosen
+
+        if (chosen == null) {
+            prefs.clear()
+        } else {
             prefs.save(chosen)
         }
     }

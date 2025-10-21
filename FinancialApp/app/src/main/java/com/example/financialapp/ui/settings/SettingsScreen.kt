@@ -45,7 +45,7 @@ fun SettingsScreen(
     onChangeMode: (ThemeMode) -> Unit,
     onChangeColor: (Long) -> Unit,
     onExportCsv: () -> Unit,
-    bgVm: BackgroundFixedViewModel = viewModel()
+    bgVm: BackgroundFixedViewModel
 ) {
     var showPicker by rememberSaveable { mutableStateOf(false) }
     val scroll = rememberScrollState()

@@ -46,7 +46,7 @@ import com.example.financialapp.ui.theme.AppThemeExt
 import com.example.financialapp.ui.theme.ThemeViewModel
 import com.example.financialapp.ui.transactions.TransactionsViewModel
 import com.example.financialapp.repo.MainViewModel
-
+import com.example.financialapp.ui.settings.BackgroundFixedViewModel
 
 
 
@@ -61,6 +61,8 @@ class MainActivity : ComponentActivity() {
             // App-wide theme + settings VMs
             val themeVm: ThemeViewModel = viewModel()
             val txVm: TransactionsViewModel = viewModel()
+            val bgVm: BackgroundFixedViewModel = viewModel()
+
 
             val mode by themeVm.mode.collectAsState()
             val primary by themeVm.primaryArgb.collectAsState()
@@ -107,18 +109,17 @@ class MainActivity : ComponentActivity() {
                             onSubsClick   = { nav.navigate("subscriptions") },
                             onGoalsClick  = { nav.navigate("goals") },
                             onSettingsClick = { nav.navigate("settings") },
-                            onCategoryClick= { nav.navigate("categories") },
+                            onCategoryClick = { nav.navigate("categories") },
                             onChatClick = { nav.navigate("chatpage") },
                             onLogoutClick = {
                                 authvm.signout()
                                 nav.navigate("login") {
-                                    popUpTo(nav.graph.startDestinationId) {
-                                        inclusive = true
-                                    } // clear stack
+                                    popUpTo(nav.graph.startDestinationId) { inclusive = true }
                                     launchSingleTop = true
                                     restoreState = false
                                 }
-                            }
+                            },
+                            bgVm = bgVm
                         )
                     }
 
@@ -168,7 +169,8 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                                 txVm.exportCsv(ctx)
-                            }
+                            },
+                            bgVm = bgVm
                         )
                     }
 

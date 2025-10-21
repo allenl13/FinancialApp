@@ -47,7 +47,7 @@ fun MainScreen(
     onCategoryClick: () -> Unit,
     onLogoutClick: () -> Unit,
     enableBackground: Boolean = true,
-    bgVm: BackgroundFixedViewModel // ✅ Shared ViewModel (passed in from AppRoot)
+    bgVm: BackgroundFixedViewModel
 ) {
     Box(
         modifier = Modifier
