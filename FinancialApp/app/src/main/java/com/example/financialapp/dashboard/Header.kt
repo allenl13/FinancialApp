@@ -19,13 +19,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.financialapp.R
 
+
 @Composable
 @Preview
 fun Header(){
     Row (
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 48.dp, end = 16.dp, bottom = 16.dp),
+            .padding(start = 16.dp, top = 38.dp, end = 16.dp, bottom = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ){
@@ -43,11 +44,7 @@ fun Header(){
                 fontWeight = FontWeight.SemiBold
             )
         }
-        Image(
-            painter = painterResource(R.drawable.men),
-            contentDescription = null,
-            modifier = Modifier
-                .size(50.dp)
-        )
+
     }
+
 }

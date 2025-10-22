@@ -3,6 +3,7 @@ package com.example.financialapp
 // Feature pages (use the correct package names)
 
 
+
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -46,6 +47,8 @@ import com.example.financialapp.ui.settings.SettingsScreen
 import com.example.financialapp.ui.theme.AppThemeExt
 import com.example.financialapp.ui.theme.ThemeViewModel
 import com.example.financialapp.ui.transactions.TransactionsViewModel
+import com.example.financialapp.repo.MainViewModel
+import com.example.financialapp.ui.settings.BackgroundFixedViewModel
 import com.example.financialapp.wallet.AddCardScreen
 import com.example.financialapp.wallet.CardDetailScreen
 import com.example.financialapp.wallet.WalletHome
@@ -65,6 +68,8 @@ class MainActivity : ComponentActivity() {
             // App-wide theme + settings VMs
             val themeVm: ThemeViewModel = viewModel()
             val txVm: TransactionsViewModel = viewModel()
+            val bgVm: BackgroundFixedViewModel = viewModel()
+
 
             val mode by themeVm.mode.collectAsState()
             val primary by themeVm.primaryArgb.collectAsState()
@@ -103,19 +108,23 @@ class MainActivity : ComponentActivity() {
                     navController = nav,
                     startDestination = "login"
                 ) {
+
                     composable("main") {
                         MainScreen(
                             onCardClick = { nav.navigate("wallet") },
+                            onCardsClick = { id -> nav.navigate("card/$id") },
+                            walletVm = walletVm,
                             expenses = mainViewModel.loadData(),
                             onConvertClick = { nav.navigate("convert") },
                             onInvestClick = { nav.navigate("invest") },
                             onSubsClick   = { nav.navigate("subscriptions") },
                             onGoalsClick  = { nav.navigate("goals") },
                             onSettingsClick = { nav.navigate("settings") },
+                            onCategoryClick = { nav.navigate("categories") },
                             onChatClick = { nav.navigate("chatpage") },
                             onCategoryClick = { nav.navigate("categories") },
-                            onCardsClick = { id -> nav.navigate("card/$id") },
-                            walletVm = walletVm,
+                            
+                           
                             onLogoutClick = {
                                 authvm.signout()
                                 nav.navigate("login") {
@@ -124,14 +133,13 @@ class MainActivity : ComponentActivity() {
                                     restoreState = false
                                 }
                             },
-                        ) { nav.navigate("login") }
+                            bgVm = bgVm
+                        ){ nav.navigate("login") }
                     }
 
                     composable("convert") {
                         // Activity-scoped VM so it survives recompositions & navigation
-                        ConvertPage(
-                            ViewModelProvider(this@MainActivity)[ConvertViewModel::class.java]
-                        )
+                        ConvertPage(convertViewModel)
                     }
 
                     composable("invest") {
@@ -174,7 +182,8 @@ class MainActivity : ComponentActivity() {
                                 }
                                 // You build txs above; export uses VM's internal source:
                                 txVm.exportCsv(ctx)
-                            }
+                            },
+                            bgVm = bgVm
                         )
                     }
 

@@ -20,21 +20,66 @@ import com.example.financialapp.Login.pages.MFAChallengePage
 import com.example.financialapp.Login.pages.SignupPage
 import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.repo.MainViewModel
+import com.example.financialapp.ui.settings.BackgroundFixedViewModel
 import com.example.financialapp.wallet.WalletListViewModel
+
+/**
+ * Auth navigation (login / signup / forgot) + simple main route.
+ * NOTE:
+ * - bgVm is injected from the caller (e.g., MainActivity) so MainScreen shares the same instance
+ *   with SettingsScreen and background changes apply instantly.
+ */
 
 // login/signup/forgot navigation
 @Composable
 fun MyAppNavigation(
     modifier: Modifier = Modifier,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    bgVm: BackgroundFixedViewModel
 ) {
     val nav = rememberNavController()
     val walletVm: WalletListViewModel = viewModel()
 
+
     NavHost(navController = nav, startDestination = "login") {
 
         composable("login") {
-            LoginPage(modifier, nav, authViewModel)
+            LoginPage(
+                modifier = modifier,
+                navController = nav,
+                authViewModel = authViewModel
+            )
+        }
+
+        composable("signup") {
+            SignupPage(
+                modifier = modifier,
+                navController = nav,
+                authViewModel = authViewModel
+            )
+        }
+
+        // Home (simple) – uses the same bgVm instance
+        composable("main") {
+            val mainViewModel: MainViewModel = viewModel()
+            MainScreen(
+                expenses = mainViewModel.loadData(),
+                onConvertClick = { nav.navigate("convert") },
+                onInvestClick  = { nav.navigate("invest") },
+                onSubsClick    = { nav.navigate("subscriptions") },
+                onGoalsClick   = { nav.navigate("goals") },
+                onSettingsClick = { nav.navigate("settings") },
+                onCategoryClick = { nav.navigate("categories") },
+                onChatClick     = { nav.navigate("chatpage") },
+                onLogoutClick   = { nav.navigate("login") },
+                bgVm = bgVm
+            )
+        composable("login") {
+          LoginPage(
+                modifier = modifier,
+                navController = nav,
+                authViewModel = authViewModel
+            )
 
             // react to auth + MFA states while on login screen
             val authState by authViewModel.authState.observeAsState(AuthState.Unauthenticated)
@@ -64,15 +109,23 @@ fun MyAppNavigation(
             }
         }
 
-        composable("signup") {
-            SignupPage(modifier, nav, authViewModel)
+          composable("signup") {
+            SignupPage(
+                modifier = modifier,
+                navController = nav,
+                authViewModel = authViewModel
+            )
         }
 
         // home
         composable("main") {
             val mainViewModel: MainViewModel = viewModel()
+            val walletVm: WalletListViewModel = viewModel()
+             
             MainScreen(
                 onCardClick     = { nav.navigate("wallet") },
+                onCardsClick    = { id -> nav.navigate("card/$id") },
+                walletVm        = walletVm,   
                 expenses        = mainViewModel.loadData(),
                 onConvertClick  = { nav.navigate("convert") },
                 onInvestClick   = { nav.navigate("invest") },
@@ -81,13 +134,14 @@ fun MyAppNavigation(
                 onSettingsClick = { nav.navigate("settings") },
                 onChatClick     = { nav.navigate("chatpage") },
                 onCategoryClick = { nav.navigate("categories") },
-                onCardsClick    = { id -> nav.navigate("card/$id") },  // from addCardButton branch
-                walletVm        = walletVm,                            // pass VM down
+                  // from addCardButton branch
+                                        // pass VM down
                 onLogoutClick   = {
                     nav.navigate("login") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
+              bgvm = bgvm
             ) { nav.navigate("login") }
         }
 
