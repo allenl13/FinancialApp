@@ -25,15 +25,42 @@ import com.example.financialapp.R
 import com.example.financialapp.repo.ExpenseDomain
 import com.example.financialapp.ui.settings.BackgroundFixedViewModel
 import com.example.financialapp.ui.settings.ProfileViewModel
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.financialapp.R
+import com.example.financialapp.repo.ExpenseDomain
+import com.example.financialapp.wallet.AddCardDialog
+import com.example.financialapp.wallet.WalletCard
+import com.example.financialapp.wallet.WalletListViewModel
 
-/**
- * Main screen entry.
- * - Displays the selected background image (shared with Settings via the same ViewModel).
- * - Renders header, user card, actions, and expense list.
- * - Top-right avatar opens Settings; bottom navigation at bottom.
- *
- * @param bgVm Shared BackgroundFixedViewModel (same instance as SettingsScreen)
- */
 @Composable
 fun MainScreen(
     onCardClick: () -> Unit = { },
@@ -46,15 +73,24 @@ fun MainScreen(
     onChatClick: () -> Unit,
     onCategoryClick: () -> Unit,
     onLogoutClick: () -> Unit,
+    onCardsClick: (Long) -> Unit,               // navigate to card details
+    walletVm: WalletListViewModel = viewModel(),
     enableBackground: Boolean = true,
     bgVm: BackgroundFixedViewModel
+                
+   ,// default VM
+    function: () -> Unit,                       // (kept to match your signature)
 ) {
+    val cards by walletVm.cards.collectAsState()
+
+    var showAdd by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White) // optional base color
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        // 1) Background layer at bottom-most
+        // 1) Background layer at bottom-most (your feature)
         if (enableBackground) {
             AppBackgroundLayerFixed(bgVm)
         }
@@ -63,11 +99,17 @@ fun MainScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 70.dp),
+                .padding(bottom = 80.dp + 72.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item { Header() }
-            item { UserCard(onClick = onCardClick) }
+
+            item {
+                UserCard(
+                    onClick = onCardClick
+                )
+            }
+
             item {
                 ButtonRow(
                     onConvertClick = onConvertClick,
@@ -76,21 +118,40 @@ fun MainScreen(
                     onGoalsClick = onGoalsClick
                 )
             }
+
+            // Wallet cards section (team feature)
+            if (cards.isNotEmpty()) {
+                item {
+                    Text(
+                        "Your cards:",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+                items(cards, key = { it.id }) { c ->
+                    WalletCardRow(
+                        item = c,
+                        onClick = { onCardsClick(c.id) }
+                    )
+                }
+            }
+
+            // Expenses list (your existing list)
             items(items = expenses) { item ->
                 ExpenseList(item)
             }
         }
 
-        // 3) Top-right small profile avatar (opens Settings)
+        // 3) Top-right small profile avatar (opens Settings) – your feature
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = 33.dp, end = 14.dp)
+            .padding(top = 33.dp, end = 14.dp)
         ) {
             SmallProfileAvatar(onClick = onSettingsClick)
         }
 
-        // 4) Bottom navigation bar
+        // 4) Bottom navigation bar (common)
         ButtonNavBar(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -99,11 +160,58 @@ fun MainScreen(
                 when (itemId) {
                     R.id.chatBot -> onChatClick()
                     R.id.settings -> onSettingsClick()
-                    R.id.categories -> onCategoryClick()
+                    // R.id.categories -> onCategoryClick()
                     R.id.logout -> onLogoutClick()
                 }
             }
         )
+
+        // FAB: Add Card (team feature)
+        ExtendedFloatingActionButton(
+            onClick = { showAdd = true },
+            text = { Text("Add Card") },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 80.dp + 16.dp)
+                .navigationBarsPadding(),
+            icon = { Icon(Icons.Rounded.Add, contentDescription = null) }
+        )
+    }
+
+    if (showAdd) {
+        AddCardDialog(
+            onDismiss = { showAdd = false },
+            onConfirm = { name, network, last4, expire ->
+                walletVm.create(name, network, last4, expire)
+                showAdd = false
+            }
+        )
+    }
+}
+
+@Composable
+private fun WalletCardRow(
+    item: WalletCard,
+    onClick: (() -> Unit)? = null
+) {
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth()
+            .then(
+                if (onClick != null) Modifier.clickable { onClick() } else Modifier
+            ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(item.name, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                "${item.network} •••• ${item.last4} | Exp ${item.expire}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -187,4 +295,6 @@ fun MainScreenPreview() {
         enableBackground = false,
         bgVm = BackgroundFixedViewModel(LocalContext.current.applicationContext as android.app.Application)
     )
+}
+    Spacer(Modifier.height(8.dp))
 }

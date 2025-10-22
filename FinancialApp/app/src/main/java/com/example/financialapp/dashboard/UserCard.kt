@@ -27,7 +27,7 @@ import com.example.financialapp.R
 @Composable
 @Preview
 fun UserCard(
-    onClick: () -> Unit = { }
+    onClick: () -> Unit = { },
 ){
     Box(
         modifier = Modifier

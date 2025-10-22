@@ -4,12 +4,14 @@ package com.example.financialapp
 
 
 
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,8 +39,8 @@ import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.data.Transaction
 import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.notifications.EnsureSubNotificationsReady
+import com.example.financialapp.repo.MainViewModel
 import com.example.financialapp.subscriptions.MainSub
-import com.example.financialapp.ui.category.CategoryListScreen
 import com.example.financialapp.ui.goal.GoalDetailScreen
 import com.example.financialapp.ui.goal.GoalsListScreen
 import com.example.financialapp.ui.settings.SettingsScreen
@@ -47,13 +49,18 @@ import com.example.financialapp.ui.theme.ThemeViewModel
 import com.example.financialapp.ui.transactions.TransactionsViewModel
 import com.example.financialapp.repo.MainViewModel
 import com.example.financialapp.ui.settings.BackgroundFixedViewModel
-
-
+import com.example.financialapp.wallet.AddCardScreen
+import com.example.financialapp.wallet.CardDetailScreen
+import com.example.financialapp.wallet.WalletHome
+import com.example.financialapp.wallet.WalletListViewModel
+// If your categories screen lives elsewhere, adjust this import:
+import com.example.financialapp.ui.category.CategoryListScreen
 
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
     private val convertViewModel: ConvertViewModel by viewModels()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -67,12 +74,13 @@ class MainActivity : ComponentActivity() {
             val mode by themeVm.mode.collectAsState()
             val primary by themeVm.primaryArgb.collectAsState()
             val exportResult by txVm.exportResult.collectAsState()
-            val authvm: AuthViewModel = viewModel() //signout
+            val authvm: AuthViewModel = viewModel() // signout
+            val walletVm: WalletListViewModel = viewModel()
 
             AppThemeExt(
                 mode = mode,
                 primaryArgb = primary
-            ){
+            ) {
                 val nav = rememberNavController()
                 val ctx = LocalContext.current
 
@@ -84,8 +92,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(exportResult) {
                     exportResult?.let { res ->
                         if (res.isSuccess) {
-                            Toast.makeText(ctx, "CSV saved: ${res.getOrNull()}", Toast.LENGTH_LONG)
-                                .show()
+                            Toast.makeText(ctx, "CSV saved: ${res.getOrNull()}", Toast.LENGTH_LONG).show()
                         } else {
                             Toast.makeText(
                                 ctx,
@@ -96,6 +103,7 @@ class MainActivity : ComponentActivity() {
                         txVm.consumeExportResult()
                     }
                 }
+
                 NavHost(
                     navController = nav,
                     startDestination = "login"
@@ -103,6 +111,9 @@ class MainActivity : ComponentActivity() {
 
                     composable("main") {
                         MainScreen(
+                            onCardClick = { nav.navigate("wallet") },
+                            onCardsClick = { id -> nav.navigate("card/$id") },
+                            walletVm = walletVm,
                             expenses = mainViewModel.loadData(),
                             onConvertClick = { nav.navigate("convert") },
                             onInvestClick = { nav.navigate("invest") },
@@ -111,6 +122,9 @@ class MainActivity : ComponentActivity() {
                             onSettingsClick = { nav.navigate("settings") },
                             onCategoryClick = { nav.navigate("categories") },
                             onChatClick = { nav.navigate("chatpage") },
+                            onCategoryClick = { nav.navigate("categories") },
+                            
+                           
                             onLogoutClick = {
                                 authvm.signout()
                                 nav.navigate("login") {
@@ -120,14 +134,12 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             bgVm = bgVm
-                        )
+                        ){ nav.navigate("login") }
                     }
 
                     composable("convert") {
                         // Activity-scoped VM so it survives recompositions & navigation
-                        ConvertPage(
-                            ViewModelProvider(this@MainActivity)[ConvertViewModel::class.java]
-                        )
+                        ConvertPage(convertViewModel)
                     }
 
                     composable("invest") {
@@ -149,7 +161,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("subscriptions") {
-                        MainSub()
+                        MainSub(exit = { nav.popBackStack() })
                     }
 
                     // Settings (theme + CSV export)
@@ -168,22 +180,22 @@ class MainActivity : ComponentActivity() {
                                         category = e.title,
                                     )
                                 }
+                                // You build txs above; export uses VM's internal source:
                                 txVm.exportCsv(ctx)
                             },
                             bgVm = bgVm
                         )
                     }
 
-                    //Ai page
-                    composable ("chatpage") {
+                    // AI page
+                    composable("chatpage") {
                         val chatvm: ChatViewModel = viewModel()
                         ChatPage(
-                            viewModel = chatvm,   // whatever your VM variable is here
+                            viewModel = chatvm,
                             modifier = Modifier
                         )
                     }
 
-                    //start on login page
                     // ------ Auth flow ------
                     composable("login") {
                         val authvm: AuthViewModel = viewModel()
@@ -207,9 +219,34 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    //categories page
-                    composable("categories"){
+                    // Categories page (from your addCardButton branch)
+                    composable("categories") {
                         CategoryListScreen()
+                    }
+
+                    // Wallet home
+                    composable("wallet") {
+                        WalletHome(
+                            nav,
+                            expenses = viewModel<MainViewModel>().loadData(),
+                        )
+                    }
+
+                    // Add/Edit Cards
+                    composable("addCard") {
+                        AddCardScreen(
+                            onDone = { nav.popBackStack() },
+                            vm = walletVm
+                        )
+                    }
+
+                    // Card detail
+                    composable(
+                        route = "card/{cardId}",
+                        arguments = listOf(navArgument("cardId") { type = NavType.LongType })
+                    ) {
+                        val id = it.arguments?.getLong("cardId") ?: return@composable
+                        CardDetailScreen(nav = nav, cardId = id, vm = walletVm)
                     }
                 }
             }

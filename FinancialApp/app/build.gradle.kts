@@ -8,7 +8,7 @@ val FB_APP_ID      = System.getenv("FIREBASE_APP_ID")       ?: "1:393051596324:a
 val FB_PROJECT_ID  = System.getenv("FIREBASE_PROJECT_ID")   ?: "financiallogin-64260"
 val FB_SENDER_ID   = System.getenv("FIREBASE_SENDER_ID")    ?: "393051596324"
 val FB_BUCKET      = System.getenv("FIREBASE_STORAGE_BUCKET") ?: "financiallogin-64260.firebasestorage.app"
-
+val ALPHA_VANTAGE_KEY_DEFAULT = System.getenv("ALPHA_VANTAGE_KEY")?: "GQ7IP0EF6N68ZSEX"
 val GEMINI_API_KEY_DEFAULT = System.getenv("GEMINI_API_KEY") ?: "AIzaSyD0F9PgEg5w3gOkka-sbanLwc6sMjCq5yo"
 
 plugins {
@@ -45,7 +45,7 @@ android {
             if (f.exists()) load(f.inputStream())
         }
 
-        val alphaKey = props.getProperty("ALPHA_VANTAGE_KEY") ?: ""
+        val alphaKey = props.getProperty("ALPHA_VANTAGE_KEY") ?: ALPHA_VANTAGE_KEY_DEFAULT
         val geminiKey = props.getProperty("GEMINI_API_KEY") ?: GEMINI_API_KEY_DEFAULT
 
         buildConfigField("String", "ALPHA_VANTAGE_KEY", "\"$alphaKey\"")
@@ -110,6 +110,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "11"
