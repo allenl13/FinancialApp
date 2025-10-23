@@ -30,7 +30,6 @@ import com.example.financialapp.wallet.WalletListViewModel
  *   with SettingsScreen and background changes apply instantly.
  */
 
-// login/signup/forgot navigation
 @Composable
 fun MyAppNavigation(
     modifier: Modifier = Modifier,
@@ -40,52 +39,18 @@ fun MyAppNavigation(
     val nav = rememberNavController()
     val walletVm: WalletListViewModel = viewModel()
 
-
     NavHost(navController = nav, startDestination = "login") {
-
         composable("login") {
             LoginPage(
                 modifier = modifier,
                 navController = nav,
                 authViewModel = authViewModel
             )
-        }
 
-        composable("signup") {
-            SignupPage(
-                modifier = modifier,
-                navController = nav,
-                authViewModel = authViewModel
-            )
-        }
-
-        // Home (simple) – uses the same bgVm instance
-        composable("main") {
-            val mainViewModel: MainViewModel = viewModel()
-            MainScreen(
-                expenses = mainViewModel.loadData(),
-                onConvertClick = { nav.navigate("convert") },
-                onInvestClick  = { nav.navigate("invest") },
-                onSubsClick    = { nav.navigate("subscriptions") },
-                onGoalsClick   = { nav.navigate("goals") },
-                onSettingsClick = { nav.navigate("settings") },
-                onCategoryClick = { nav.navigate("categories") },
-                onChatClick     = { nav.navigate("chatpage") },
-                onLogoutClick   = { nav.navigate("login") },
-                bgVm = bgVm
-            )
-        composable("login") {
-          LoginPage(
-                modifier = modifier,
-                navController = nav,
-                authViewModel = authViewModel
-            )
-
-            // react to auth + MFA states while on login screen
+            // React to auth + MFA states while on login screen
             val authState by authViewModel.authState.observeAsState(AuthState.Unauthenticated)
-            val mfaState  by authViewModel.mfaState.observeAsState("")
+            val mfaState by authViewModel.mfaState.observeAsState("")
 
-            // If primary sign-in succeeded, decide whether to enroll MFA or go home
             LaunchedEffect(authState) {
                 if (authState is AuthState.Authenticated) {
                     if (authViewModel.needsMfaEnrollment()) {
@@ -98,51 +63,22 @@ fun MyAppNavigation(
                 }
             }
 
-            // If MFA is required during sign-in, go to the challenge screen
             LaunchedEffect(mfaState) {
                 when (mfaState) {
                     "MFA_REQUIRED" -> nav.navigate("mfaChallenge")
-                    "MFA_SUCCESS"  -> nav.navigate("main") {
+                    "MFA_SUCCESS" -> nav.navigate("main") {
                         popUpTo("login") { inclusive = true }
                     }
                 }
             }
         }
 
-          composable("signup") {
+        composable("signup") {
             SignupPage(
                 modifier = modifier,
                 navController = nav,
                 authViewModel = authViewModel
             )
-        }
-
-        // home
-        composable("main") {
-            val mainViewModel: MainViewModel = viewModel()
-            val walletVm: WalletListViewModel = viewModel()
-             
-            MainScreen(
-                onCardClick     = { nav.navigate("wallet") },
-                onCardsClick    = { id -> nav.navigate("card/$id") },
-                walletVm        = walletVm,   
-                expenses        = mainViewModel.loadData(),
-                onConvertClick  = { nav.navigate("convert") },
-                onInvestClick   = { nav.navigate("invest") },
-                onSubsClick     = { nav.navigate("subscriptions") },
-                onGoalsClick    = { nav.navigate("goals") },
-                onSettingsClick = { nav.navigate("settings") },
-                onChatClick     = { nav.navigate("chatpage") },
-                onCategoryClick = { nav.navigate("categories") },
-                  // from addCardButton branch
-                                        // pass VM down
-                onLogoutClick   = {
-                    nav.navigate("login") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                },
-              bgvm = bgvm
-            ) { nav.navigate("login") }
         }
 
         composable("forgot") {
@@ -176,6 +112,32 @@ fun MyAppNavigation(
                     popUpTo("login") { inclusive = true }
                 }
             }
+        }
+
+        // Home
+        composable("main") {
+            val mainViewModel: MainViewModel = viewModel()
+            MainScreen(
+                onCardClick = { nav.navigate("wallet") },
+                onCardsClick = { id -> nav.navigate("card/$id") },
+                walletVm = walletVm,
+                expenses = mainViewModel.loadData(),
+                onConvertClick = { nav.navigate("convert") },
+                onInvestClick = { nav.navigate("invest") },
+                onSubsClick = { nav.navigate("subscriptions") },
+                onGoalsClick = { nav.navigate("goals") },
+                onSettingsClick = { nav.navigate("settings") },
+                onChatClick = { nav.navigate("chatpage") },
+                onCategoryClick = { nav.navigate("categories") },
+                onLogoutClick = {
+                    nav.navigate("login") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                enableBackground = true,
+                bgVm = bgVm,
+                function = {}
+            )
         }
     }
 }
