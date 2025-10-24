@@ -11,8 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.financialapp.Login.AuthState
-import com.example.financialapp.Login.AuthViewModel
+
 import com.example.financialapp.Login.pages.AddMFAPage
 import com.example.financialapp.Login.pages.ForgotPassword
 import com.example.financialapp.Login.pages.LoginPage
@@ -44,42 +43,7 @@ fun MyAppNavigation(
     NavHost(navController = nav, startDestination = "login") {
 
         composable("login") {
-            LoginPage(
-                modifier = modifier,
-                navController = nav,
-                authViewModel = authViewModel
-            )
-        }
-
-        composable("signup") {
-            SignupPage(
-                modifier = modifier,
-                navController = nav,
-                authViewModel = authViewModel
-            )
-        }
-
-        // Home (simple) – uses the same bgVm instance
-        composable("main") {
-            val mainViewModel: MainViewModel = viewModel()
-            MainScreen(
-                expenses = mainViewModel.loadData(),
-                onConvertClick = { nav.navigate("convert") },
-                onInvestClick  = { nav.navigate("invest") },
-                onSubsClick    = { nav.navigate("subscriptions") },
-                onGoalsClick   = { nav.navigate("goals") },
-                onSettingsClick = { nav.navigate("settings") },
-                onCategoryClick = { nav.navigate("categories") },
-                onChatClick     = { nav.navigate("chatpage") },
-                onLogoutClick   = { nav.navigate("login") },
-                bgVm = bgVm
-            )
-        composable("login") {
-          LoginPage(
-                modifier = modifier,
-                navController = nav,
-                authViewModel = authViewModel
-            )
+            LoginPage(modifier, nav, authViewModel)
 
             // react to auth + MFA states while on login screen
             val authState by authViewModel.authState.observeAsState(AuthState.Unauthenticated)
@@ -109,7 +73,8 @@ fun MyAppNavigation(
             }
         }
 
-          composable("signup") {
+
+        composable("signup") {
             SignupPage(
                 modifier = modifier,
                 navController = nav,
@@ -117,65 +82,70 @@ fun MyAppNavigation(
             )
         }
 
-        // home
+        // Home
         composable("main") {
             val mainViewModel: MainViewModel = viewModel()
-            val walletVm: WalletListViewModel = viewModel()
-             
             MainScreen(
-                onCardClick     = { nav.navigate("wallet") },
-                onCardsClick    = { id -> nav.navigate("card/$id") },
-                walletVm        = walletVm,   
-                expenses        = mainViewModel.loadData(),
-                onConvertClick  = { nav.navigate("convert") },
-                onInvestClick   = { nav.navigate("invest") },
-                onSubsClick     = { nav.navigate("subscriptions") },
-                onGoalsClick    = { nav.navigate("goals") },
+                onCardClick = { nav.navigate("wallet") },
+                onCardsClick = { id -> nav.navigate("card/$id") },
+                walletVm = walletVm,
+                expenses = mainViewModel.loadData(),
+                onConvertClick = { nav.navigate("convert") },
+                onInvestClick = { nav.navigate("invest") },
+                onSubsClick = { nav.navigate("subscriptions") },
+                onGoalsClick = { nav.navigate("goals") },
                 onSettingsClick = { nav.navigate("settings") },
-                onChatClick     = { nav.navigate("chatpage") },
                 onCategoryClick = { nav.navigate("categories") },
-                  // from addCardButton branch
-                                        // pass VM down
-                onLogoutClick   = {
+
+                onChatClick = { nav.navigate("chatpage") },
+                onLogoutClick = {
                     nav.navigate("login") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
-              bgvm = bgvm
-            ) { nav.navigate("login") }
-        }
-
-        composable("forgot") {
-            ForgotPassword(
-                vm = authViewModel,
-                onBackToLogin = { nav.popBackStack("login", inclusive = false) }
+                bgVm = bgVm,
+                function = { nav.navigate("login") }
             )
         }
 
-        // MFA enrollment page (one-time)
-        composable("addMfa") {
-            val activity = LocalContext.current as Activity
-            AddMFAPage(
-                vm = authViewModel,
-                activity = activity
-            ) {
-                nav.navigate("main") {
-                    popUpTo("login") { inclusive = true }
+
+
+            composable("forgot") {
+                ForgotPassword(
+                    vm = authViewModel,
+                    onBackToLogin = { nav.popBackStack("login", inclusive = false) }
+                )
+            }
+
+            // MFA enrollment page (one-time)
+            composable("addMfa") {
+                val activity = LocalContext.current as Activity
+                AddMFAPage(
+                    vm = authViewModel,
+                    activity = activity
+                ) {
+                    nav.navigate("main") {
+                        popUpTo("login") { inclusive = true }
+                    }
                 }
             }
-        }
 
-        // MFA challenge page
-        composable("mfaChallenge") {
-            val activity = LocalContext.current as Activity
-            MFAChallengePage(
-                vm = authViewModel,
-                activity = activity
-            ) {
-                nav.navigate("main") {
-                    popUpTo("login") { inclusive = true }
+            // MFA challenge page
+            composable("mfaChallenge") {
+                val activity = LocalContext.current as Activity
+                MFAChallengePage(
+                    vm = authViewModel,
+                    activity = activity
+                ) {
+                    nav.navigate("main") {
+                        popUpTo("login") { inclusive = true }
+                    }
                 }
             }
         }
     }
+
+@Composable
+fun CategoryScreens() {
+    TODO("Not yet implemented")
 }

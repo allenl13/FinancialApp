@@ -51,12 +51,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.financialapp.R
-import com.example.financialapp.repo.ExpenseDomain
 import com.example.financialapp.wallet.AddCardDialog
 import com.example.financialapp.wallet.WalletCard
 import com.example.financialapp.wallet.WalletListViewModel
@@ -73,16 +69,14 @@ fun MainScreen(
     onChatClick: () -> Unit,
     onCategoryClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    onCardsClick: (Long) -> Unit,               // navigate to card details
+    onCardsClick: (Long) -> Unit = {},             // navigate to card details
     walletVm: WalletListViewModel = viewModel(),
     enableBackground: Boolean = true,
-    bgVm: BackgroundFixedViewModel
-                
-   ,// default VM
-    function: () -> Unit,                       // (kept to match your signature)
+    bgVm: BackgroundFixedViewModel,
+    // default VM
+    function: @Composable () -> Unit = {},                      // (kept to match your signature)
 ) {
     val cards by walletVm.cards.collectAsState()
-
     var showAdd by remember { mutableStateOf(false) }
 
     Box(
@@ -160,7 +154,7 @@ fun MainScreen(
                 when (itemId) {
                     R.id.chatBot -> onChatClick()
                     R.id.settings -> onSettingsClick()
-                    // R.id.categories -> onCategoryClick()
+                    R.id.categories -> onCategoryClick()
                     R.id.logout -> onLogoutClick()
                 }
             }
@@ -294,7 +288,7 @@ fun MainScreenPreview() {
         onLogoutClick = {},
         enableBackground = false,
         bgVm = BackgroundFixedViewModel(LocalContext.current.applicationContext as android.app.Application)
-    )
-}
-    Spacer(Modifier.height(8.dp))
+    ) {
+        Spacer(Modifier.height(8.dp))
+    }
 }

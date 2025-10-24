@@ -47,7 +47,6 @@ import com.example.financialapp.ui.settings.SettingsScreen
 import com.example.financialapp.ui.theme.AppThemeExt
 import com.example.financialapp.ui.theme.ThemeViewModel
 import com.example.financialapp.ui.transactions.TransactionsViewModel
-import com.example.financialapp.repo.MainViewModel
 import com.example.financialapp.ui.settings.BackgroundFixedViewModel
 import com.example.financialapp.wallet.AddCardScreen
 import com.example.financialapp.wallet.CardDetailScreen
@@ -122,7 +121,7 @@ class MainActivity : ComponentActivity() {
                             onSettingsClick = { nav.navigate("settings") },
                             onCategoryClick = { nav.navigate("categories") },
                             onChatClick = { nav.navigate("chatpage") },
-                            onCategoryClick = { nav.navigate("categories") },
+
                             
                            
                             onLogoutClick = {
