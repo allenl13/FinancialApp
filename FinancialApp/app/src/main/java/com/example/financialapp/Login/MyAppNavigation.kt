@@ -23,12 +23,6 @@ import com.example.financialapp.repo.MainViewModel
 import com.example.financialapp.ui.settings.BackgroundFixedViewModel
 import com.example.financialapp.wallet.WalletListViewModel
 
-/**
- * Auth navigation (login / signup / forgot) + simple main route.
- * NOTE:
- * - bgVm is injected from the caller (e.g., MainActivity) so MainScreen shares the same instance
- *   with SettingsScreen and background changes apply instantly.
- */
 
 @Composable
 fun MyAppNavigation(
@@ -128,7 +122,7 @@ fun MyAppNavigation(
                 onGoalsClick = { nav.navigate("goals") },
                 onSettingsClick = { nav.navigate("settings") },
                 onChatClick = { nav.navigate("chatpage") },
-                onCategoryClick = { nav.navigate("categories") },
+                onReportClick = { nav.navigate("report") },
                 onLogoutClick = {
                     nav.navigate("login") {
                         popUpTo("login") { inclusive = true }

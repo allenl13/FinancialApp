@@ -17,7 +17,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -40,6 +39,7 @@ import com.example.financialapp.data.Transaction
 import com.example.financialapp.notifications.EnsureNotificationsReady
 import com.example.financialapp.notifications.EnsureSubNotificationsReady
 import com.example.financialapp.repo.MainViewModel
+import com.example.financialapp.report.ReportScreen
 import com.example.financialapp.subscriptions.MainSub
 import com.example.financialapp.ui.goal.GoalDetailScreen
 import com.example.financialapp.ui.goal.GoalsListScreen
@@ -66,14 +66,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             // App-wide theme + settings VMs
             val themeVm: ThemeViewModel = viewModel()
-            val txVm: TransactionsViewModel = viewModel()
-            val bgVm: BackgroundFixedViewModel = viewModel()
+            val transactionsViewModel: TransactionsViewModel = viewModel()
+            val backgroundFixedViewModel: BackgroundFixedViewModel = viewModel()
 
 
             val mode by themeVm.mode.collectAsState()
             val primary by themeVm.primaryArgb.collectAsState()
-            val exportResult by txVm.exportResult.collectAsState()
-            val authvm: AuthViewModel = viewModel() // signout
+            val exportResult by transactionsViewModel.exportResult.collectAsState()
+            val authViewModel: AuthViewModel = viewModel() // signout
             val walletVm: WalletListViewModel = viewModel()
 
             AppThemeExt(
@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
                                 Toast.LENGTH_LONG
                             ).show()
                         }
-                        txVm.consumeExportResult()
+                        transactionsViewModel.consumeExportResult()
                     }
                 }
 
@@ -119,18 +119,18 @@ class MainActivity : ComponentActivity() {
                             onSubsClick   = { nav.navigate("subscriptions") },
                             onGoalsClick  = { nav.navigate("goals") },
                             onSettingsClick = { nav.navigate("settings") },
-                            onCategoryClick = { nav.navigate("categories") },
+                            onReportClick = { nav.navigate("report") },
                             onChatClick = { nav.navigate("chatpage") },
                            
                             onLogoutClick = {
-                                authvm.signout()
+                                authViewModel.signout()
                                 nav.navigate("login") {
                                     popUpTo(nav.graph.startDestinationId) { inclusive = true }
                                     launchSingleTop = true
                                     restoreState = false
                                 }
                             },
-                            bgVm = bgVm
+                            bgVm = backgroundFixedViewModel
                         ){ nav.navigate("login") }
                     }
 
@@ -178,9 +178,9 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                                 // You build txs above; export uses VM's internal source:
-                                txVm.exportCsv(ctx)
+                                transactionsViewModel.exportCsv(ctx)
                             },
-                            bgVm = bgVm
+                            bgVm = backgroundFixedViewModel
                         )
                     }
 
@@ -216,9 +216,12 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // Categories page (from your addCardButton branch)
-                    composable("categories") {
-                        CategoryListScreen()
+
+//                    composable("categories") {
+//                        CategoryListScreen()
+//                    }
+                    composable("report"){
+                        ReportScreen()
                     }
 
                     // Wallet home
