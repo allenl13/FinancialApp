@@ -29,7 +29,7 @@ import com.example.financialapp.Investment.InvestPage
 import com.example.financialapp.Investment.InvestVMFactory
 import com.example.financialapp.Investment.InvestViewModel
 import com.example.financialapp.Login.AuthViewModel
-import com.example.financialapp.Login.pages.AddMFA
+import com.example.financialapp.Login.pages.AddMFAPage
 import com.example.financialapp.Login.pages.ForgotPassword
 import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.Login.pages.SignupPage
@@ -176,11 +176,11 @@ class MainActivity : ComponentActivity() {
                                         category = e.title,
                                     )
                                 }
-                                // If exportCsv needs the list, pass `txs` here. Otherwise keep as-is:
-                                txVm.exportCsv(ctx /*, txs */)
+                                transactionsViewModel.exportCsv(context)
                             },
+                            bgVm = backgroundFixedViewModel,
                             onAddMfa = {
-                                nav.navigate("addMfa")
+                                navController.navigate("addMfa")
                             }
                         )
                     }
@@ -234,10 +234,10 @@ class MainActivity : ComponentActivity() {
                         val authvm: AuthViewModel = viewModel()
                         val act = (LocalContext.current as? Activity) ?: return@composable
 
-                        AddMFA(
+                        AddMFAPage(
                             vm = authvm,
                             activity = act,
-                            onDone = { nav.popBackStack() } // go back after success
+                            onDone = { navController.popBackStack() } // go back after success
                         )
                     }
                     // Add/Edit Cards

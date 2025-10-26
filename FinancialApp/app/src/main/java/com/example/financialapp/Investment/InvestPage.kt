@@ -1,5 +1,6 @@
 package com.example.financialapp.Investment
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,6 +51,7 @@ fun InvestPage(viewModel: InvestViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -68,12 +70,12 @@ fun InvestPage(viewModel: InvestViewModel) {
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
         ) {
             item {
-                Text("My Portfolio", style = MaterialTheme.typography.headlineMedium)
+                Text("My Portfolio", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
             }
 
             // Holdings list
             items(portfolio) { inv ->
-                Text("${inv.shares} shares of ${inv.nameInvest} @ ${inv.price}")
+                Text("${inv.shares} shares of ${inv.nameInvest} @ ${inv.price}", color = MaterialTheme.colorScheme.primary)
             }
 
             // Stock symbol
@@ -174,9 +176,9 @@ fun InvestPage(viewModel: InvestViewModel) {
 
             // Totals
             item {
-                Text("Cost basis: $${"%.2f".format(viewModel.cBasis())}")
-                Text("Market value: $${"%.2f".format(viewModel.marktValue())}")
-                Text("Unrealised P/L: $${"%.2f".format(viewModel.unrealisedPL())}")
+                Text("Cost basis: $${"%.2f".format(viewModel.cBasis())}", color = MaterialTheme.colorScheme.primary)
+                Text("Market value: $${"%.2f".format(viewModel.marktValue())}", color = MaterialTheme.colorScheme.primary)
+                Text("Unrealised P/L: $${"%.2f".format(viewModel.unrealisedPL())}", color = MaterialTheme.colorScheme.primary)
             }
         }
     }

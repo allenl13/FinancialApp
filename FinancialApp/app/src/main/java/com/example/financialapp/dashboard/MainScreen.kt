@@ -137,7 +137,7 @@ fun MainScreen(
             SmallProfileAvatar(onClick = onSettingsClick)
         }
 
-        // 4) Bottom navigation bar (common)
+        // 4) Bottom navigation ba
         ButtonNavBar(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -152,7 +152,7 @@ fun MainScreen(
             }
         )
 
-        // FAB: Add Card (team feature)
+        // FAB: Add Card
         ExtendedFloatingActionButton(
             onClick = { showAdd = true },
             text = { Text("Add Card") },

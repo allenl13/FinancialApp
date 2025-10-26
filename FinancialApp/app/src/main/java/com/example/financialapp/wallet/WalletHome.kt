@@ -65,17 +65,3 @@ fun WalletHome(
         }
     }
 }
-
-//@Composable
-//private fun TransactionRow(t: Transaction) {
-//    // minimal row; style it how you like
-//    Surface(tonalElevation = 2.dp, shape = RoundedCornerShape(12.dp)) {
-//        Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-//            Column {
-//                Text(t.category, style = MaterialTheme.typography.titleMedium)
-//                Text(t.date, color = MaterialTheme.colorScheme.onSurfaceVariant)
-//            }
-//            Text("$${t.amount}", style = MaterialTheme.typography.titleMedium)
-//        }
-//    }
-//}
