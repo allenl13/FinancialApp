@@ -51,8 +51,11 @@ import com.example.financialapp.wallet.AddCardScreen
 import com.example.financialapp.wallet.CardDetailScreen
 import com.example.financialapp.wallet.WalletHome
 import com.example.financialapp.wallet.WalletListViewModel
+import android.content.Context
+import androidx.compose.runtime.*
 
 class MainActivity : ComponentActivity() {
+
     private val mainViewModel: MainViewModel by viewModels()
     private val convertViewModel: ConvertViewModel by viewModels()
 
@@ -61,77 +64,65 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            // App-wide theme + settings VMs
-            val themeViewModel: ThemeViewModel = viewModel()
-            val transactionsViewModel: TransactionsViewModel = viewModel()
-            val backgroundFixedViewModel: BackgroundFixedViewModel = viewModel()
+            MainApp(mainViewModel, convertViewModel)
+        }
+    }
+}
 
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+private fun MainApp(
+    mainViewModel: MainViewModel,
+    convertViewModel: ConvertViewModel
+) {
+    // --- app-wide viewmodels ---
+    val themeViewModel: ThemeViewModel = viewModel()
+    val transactionsViewModel: TransactionsViewModel = viewModel()
+    val backgroundFixedViewModel: BackgroundFixedViewModel = viewModel()
+    val authViewModel: AuthViewModel = viewModel()
+    val walletListViewModel: WalletListViewModel = viewModel()
 
-            val mode by themeViewModel.mode.collectAsState()
-            val primary by themeViewModel.primaryArgb.collectAsState()
-            val exportResult by transactionsViewModel.exportResult.collectAsState()
-            val authViewModel: AuthViewModel = viewModel() // signout
-            val walletListViewModel: WalletListViewModel = viewModel()
+    val mode by themeViewModel.mode.collectAsState()
+    val primary by themeViewModel.primaryArgb.collectAsState()
+    val exportResult by transactionsViewModel.exportResult.collectAsState()
 
-            AppThemeExt(
-                mode = mode,
-                primaryArgb = primary
-            ) {
-                val navController = rememberNavController()
-                val context = LocalContext.current
+    AppThemeExt(
+        mode = mode,
+        primaryArgb = primary
+    ) {
+        val navController = rememberNavController()
+        val context = LocalContext.current
 
-                // Set up notification channels safely for Android 13+ only
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                EnsureNotificationsReady()
-                EnsureSubNotificationsReady()
-                }
+        SetupNotifications()
+        HandleCsvExportToast(exportResult as Result<String>?, transactionsViewModel, context)
 
-                // Toast on CSV export result
-                LaunchedEffect(exportResult) {
-                    exportResult?.let { result ->
-                        if (result.isSuccess) {
-                            Toast.makeText(context, "CSV saved: ${result.getOrNull()}", Toast.LENGTH_LONG).show()
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "Export failed: ${result.exceptionOrNull()?.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
+        // --- NavHost ---
+        NavHost(navController = navController, startDestination = "login") {
+
+            composable("main") {
+                MainScreen(
+                    onCardClick = { navController.navigate("wallet") },
+                    onCardsClick = { id -> navController.navigate("card/$id") },
+                    walletListViewModel = walletListViewModel,
+                    expenses = mainViewModel.loadData(),
+                    onConvertClick = { navController.navigate("convert") },
+                    onInvestClick = { navController.navigate("invest") },
+                    onSubsClick = { navController.navigate("subscriptions") },
+                    onGoalsClick = { navController.navigate("goals") },
+                    onSettingsClick = { navController.navigate("settings") },
+                    onReportClick = { navController.navigate("report") },
+                    onChatClick = { navController.navigate("chatpage") },
+                    onLogoutClick = {
+                        authViewModel.signout()
+                        navController.navigate("login") {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            launchSingleTop = true
+                            restoreState = false
                         }
-                        transactionsViewModel.consumeExportResult()
-                    }
-                }
-
-                NavHost(
-                    navController = navController,
-                    startDestination = "login"
-                ) {
-
-                    composable("main") {
-                        MainScreen(
-                            onCardClick = { navController.navigate("wallet") },
-                            onCardsClick = { id -> navController.navigate("card/$id") },
-                            walletListViewModel = walletListViewModel,
-                            expenses = mainViewModel.loadData(),
-                            onConvertClick = { navController.navigate("convert") },
-                            onInvestClick = { navController.navigate("invest") },
-                            onSubsClick   = { navController.navigate("subscriptions") },
-                            onGoalsClick  = { navController.navigate("goals") },
-                            onSettingsClick = { navController.navigate("settings") },
-                            onReportClick = { navController.navigate("report") },
-                            onChatClick = { navController.navigate("chatpage") },
-
-                            onLogoutClick = {
-                                authViewModel.signout()
-                                navController.navigate("login") {
-                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                                    launchSingleTop = true
-                                    restoreState = false
-                                }
-                            },
-                            bgVm = backgroundFixedViewModel
-                        ){ navController.navigate("login") }
-                    }
+                    },
+                    bgVm = backgroundFixedViewModel
+                ) { navController.navigate("login") }
+            }
 
                     composable("convert") {
                         // Activity-scoped VM so it survives recompositions & navigation
@@ -139,7 +130,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("invest") {
-                        // Provide repo via factory (needs Context)
+                        // Provide repo via factory
                         val ctx = LocalContext.current
                         val vm: InvestViewModel = viewModel(factory = InvestVMFactory(ctx))
                         InvestPage(viewModel = vm)
@@ -259,5 +250,37 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+@Composable
+private fun HandleCsvExportToast(
+    exportResult: Result<String>?,
+    transactionsViewModel: TransactionsViewModel,
+    context: Context
+) {
+    LaunchedEffect(exportResult) {
+        exportResult?.let { result ->
+            if (result.isSuccess) {
+                Toast.makeText(
+                    context,
+                    "CSV saved: ${result.getOrNull()}",
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                Toast.makeText(
+                    context,
+                    "Export failed: ${result.exceptionOrNull()?.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            transactionsViewModel.consumeExportResult()
+        }
+    }
+}
+
+@Composable
+fun SetupNotifications() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        EnsureNotificationsReady()
+        EnsureSubNotificationsReady()
     }
 }
