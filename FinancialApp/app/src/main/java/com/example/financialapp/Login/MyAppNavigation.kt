@@ -11,8 +11,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.financialapp.Login.AuthState
-import com.example.financialapp.Login.AuthViewModel
 import com.example.financialapp.Login.pages.AddMFAPage
 import com.example.financialapp.Login.pages.ForgotPassword
 import com.example.financialapp.Login.pages.LoginPage
@@ -114,7 +112,7 @@ fun MyAppNavigation(
             MainScreen(
                 onCardClick = { nav.navigate("wallet") },
                 onCardsClick = { id -> nav.navigate("card/$id") },
-                walletVm = walletVm,
+                walletListViewModel = walletVm,
                 expenses = mainViewModel.loadData(),
                 onConvertClick = { nav.navigate("convert") },
                 onInvestClick = { nav.navigate("invest") },

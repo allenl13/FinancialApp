@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -49,7 +48,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.financialapp.wallet.AddCardDialog
 import com.example.financialapp.wallet.WalletCard
@@ -68,12 +66,12 @@ fun MainScreen(
     onReportClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onCardsClick: (Long) -> Unit,               // navigate to card details
-    walletVm: WalletListViewModel = viewModel(),
+    walletListViewModel: WalletListViewModel = viewModel(),
     enableBackground: Boolean = true,
     bgVm: BackgroundFixedViewModel,
     function: () -> Unit
 ) {
-    val cards by walletVm.cards.collectAsState()
+    val cards by walletListViewModel.cards.collectAsState()
 
     var showAdd by remember { mutableStateOf(false) }
 
@@ -170,7 +168,7 @@ fun MainScreen(
         AddCardDialog(
             onDismiss = { showAdd = false },
             onConfirm = { name, network, last4, expire ->
-                walletVm.create(name, network, last4, expire)
+                walletListViewModel.create(name, network, last4, expire)
                 showAdd = false
             }
         )
