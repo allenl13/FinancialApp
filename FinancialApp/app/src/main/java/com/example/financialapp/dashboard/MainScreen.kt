@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -49,7 +48,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.financialapp.wallet.AddCardDialog
 import com.example.financialapp.wallet.WalletCard
@@ -65,15 +63,15 @@ fun MainScreen(
     onGoalsClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onChatClick: () -> Unit,
-    onCategoryClick: () -> Unit,
+    onReportClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onCardsClick: (Long) -> Unit,               // navigate to card details
-    walletVm: WalletListViewModel = viewModel(),
+    walletListViewModel: WalletListViewModel = viewModel(),
     enableBackground: Boolean = true,
-    bgVm: BackgroundFixedViewModel,             // default VM
-    function: () -> Unit                        // (kept to match your signature)
+    bgVm: BackgroundFixedViewModel,
+    function: () -> Unit
 ) {
-    val cards by walletVm.cards.collectAsState()
+    val cards by walletListViewModel.cards.collectAsState()
 
     var showAdd by remember { mutableStateOf(false) }
 
@@ -82,7 +80,7 @@ fun MainScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // 1) Background layer at bottom-most (your feature)
+        // 1) Background layer at bottom-most
         if (enableBackground) {
             AppBackgroundLayerFixed(bgVm)
         }
@@ -111,7 +109,7 @@ fun MainScreen(
                 )
             }
 
-            // Wallet cards section (team feature)
+            // Wallet cards section
             if (cards.isNotEmpty()) {
                 item {
                     Text(
@@ -128,13 +126,9 @@ fun MainScreen(
                 }
             }
 
-            // Expenses list (your existing list)
-            items(items = expenses) { item ->
-                ExpenseList(item)
-            }
         }
 
-        // 3) Top-right small profile avatar (opens Settings) – your feature
+        // 3) Top-right small profile avatar (opens Settings)
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -152,7 +146,7 @@ fun MainScreen(
                 when (itemId) {
                     R.id.chatBot -> onChatClick()
                     R.id.settings -> onSettingsClick()
-                    // R.id.categories -> onCategoryClick()
+                    R.id.report -> onReportClick()
                     R.id.logout -> onLogoutClick()
                 }
             }
@@ -174,7 +168,7 @@ fun MainScreen(
         AddCardDialog(
             onDismiss = { showAdd = false },
             onConfirm = { name, network, last4, expire ->
-                walletVm.create(name, network, last4, expire)
+                walletListViewModel.create(name, network, last4, expire)
                 showAdd = false
             }
         )
@@ -211,7 +205,7 @@ private fun WalletCardRow(
 /**
  * Background image layer that listens to the shared BackgroundFixedViewModel.
  * If no selection exists, it shows nothing.
- * ✅ Reacts instantly when SettingsScreen.applyTemp() is called.
+ * Reacts instantly when SettingsScreen.applyTemp() is called.
  */
 @Composable
 private fun AppBackgroundLayerFixed(vm: BackgroundFixedViewModel) {
@@ -283,7 +277,7 @@ fun MainScreenPreview() {
         onGoalsClick = {},
         onSettingsClick = {},
         onChatClick = {},
-        onCategoryClick = {},
+        onReportClick = {},
         onLogoutClick = {},
         onCardsClick = { _ -> },
         enableBackground = false,
