@@ -173,7 +173,7 @@ class AuthViewModel : ViewModel() {
 
         _mfaState.postValue("ENROLL_SENDING")
 
-        val options = PhoneAuthOptions.newBuilder()
+        val options = PhoneAuthOptions.newBuilder(FirebaseAuth.getInstance())
             .setPhoneNumber(phoneE164)               // e.g. +15555550100 (test number)
             .setTimeout(60L, TimeUnit.SECONDS)
             .setActivity(activity)
@@ -264,7 +264,7 @@ class AuthViewModel : ViewModel() {
             return
         }
         val cred = PhoneAuthProvider.getCredential(vid, code)
-        finishMfaSignIn(cred) // ✅
+        finishMfaSignIn(cred)
     }
 
     // ✅ Finish the MFA sign-in using the built credential

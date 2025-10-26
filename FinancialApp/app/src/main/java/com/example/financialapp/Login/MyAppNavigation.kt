@@ -11,16 +11,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+
+// Screens
 import com.example.financialapp.Login.pages.AddMFAPage
 import com.example.financialapp.Login.pages.ForgotPassword
 import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.Login.pages.MFAChallengePage
 import com.example.financialapp.Login.pages.SignupPage
 import com.example.financialapp.dashboard.MainScreen
+
+// VMs + deps
 import com.example.financialapp.repo.MainViewModel
 import com.example.financialapp.ui.settings.BackgroundFixedViewModel
 import com.example.financialapp.wallet.WalletListViewModel
-
 
 @Composable
 fun MyAppNavigation(
@@ -32,6 +35,8 @@ fun MyAppNavigation(
     val walletVm: WalletListViewModel = viewModel()
 
     NavHost(navController = nav, startDestination = "login") {
+
+        // -------- Login --------
         composable("login") {
             LoginPage(
                 modifier = modifier,
@@ -39,10 +44,11 @@ fun MyAppNavigation(
                 authViewModel = authViewModel
             )
 
-            // React to auth + MFA states while on login screen
+            // react to auth + MFA states while on login screen
             val authState by authViewModel.authState.observeAsState(AuthState.Unauthenticated)
             val mfaState by authViewModel.mfaState.observeAsState("")
 
+            // If primary sign-in succeeded, decide whether to enroll MFA or go home
             LaunchedEffect(authState) {
                 if (authState is AuthState.Authenticated) {
                     if (authViewModel.needsMfaEnrollment()) {
@@ -55,6 +61,7 @@ fun MyAppNavigation(
                 }
             }
 
+            // If MFA is required during sign-in, go to the challenge screen
             LaunchedEffect(mfaState) {
                 when (mfaState) {
                     "MFA_REQUIRED" -> nav.navigate("mfaChallenge")
@@ -65,6 +72,7 @@ fun MyAppNavigation(
             }
         }
 
+        // -------- Signup --------
         composable("signup") {
             SignupPage(
                 modifier = modifier,
@@ -73,6 +81,7 @@ fun MyAppNavigation(
             )
         }
 
+        // -------- Forgot Password --------
         composable("forgot") {
             ForgotPassword(
                 vm = authViewModel,
@@ -80,7 +89,7 @@ fun MyAppNavigation(
             )
         }
 
-        // MFA enrollment page (one-time)
+        // -------- MFA Enrollment (one-time) --------
         composable("addMfa") {
             val activity = LocalContext.current as Activity
             AddMFAPage(
@@ -93,7 +102,7 @@ fun MyAppNavigation(
             }
         }
 
-        // MFA challenge page
+        // -------- MFA Challenge (sign-in step-up) --------
         composable("mfaChallenge") {
             val activity = LocalContext.current as Activity
             MFAChallengePage(
@@ -106,7 +115,7 @@ fun MyAppNavigation(
             }
         }
 
-        // Home
+        // -------- Home --------
         composable("main") {
             val mainViewModel: MainViewModel = viewModel()
             MainScreen(

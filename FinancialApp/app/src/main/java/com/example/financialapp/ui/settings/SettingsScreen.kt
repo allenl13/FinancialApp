@@ -45,6 +45,7 @@ fun SettingsScreen(
     onChangeMode: (ThemeMode) -> Unit,
     onChangeColor: (Long) -> Unit,
     onExportCsv: () -> Unit,
+    onAddMfa: () -> Unit,          // ⬅️ new callback
     bgVm: BackgroundFixedViewModel
 ) {
     var showPicker by rememberSaveable { mutableStateOf(false) }
@@ -89,24 +90,16 @@ fun SettingsScreen(
 
         Button(onClick = onExportCsv) { Text("Export Transactions (CSV)") }
 
-        // --- Background section (unchanged layout; panel is scrollable) ---
-        SectionBlock(title = "Background") {
-            val selected by bgVm.selected.collectAsState()
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { showPicker = true }) { Text("Change Background Image") }
-                OutlinedButton(onClick = { bgVm.reset() }, enabled = (selected != null)) {
-                    Text("Reset to Default")
-                }
-            }
+        Divider()
 
-            if (showPicker) {
-                Spacer(Modifier.height(8.dp))
-                BackgroundPickerPanel(
-                    vm = bgVm,
-                    onApply = { showPicker = false },
-                    onCancel = { showPicker = false }
-                )
-            }
+        // --- Security ---
+        Text("Security", style = MaterialTheme.typography.titleLarge)
+        Text(
+            "Protect your account by adding 2-Step Verification.",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Button(onClick = onAddMfa) {
+            Text("Add MFA")
         }
     }
 }
