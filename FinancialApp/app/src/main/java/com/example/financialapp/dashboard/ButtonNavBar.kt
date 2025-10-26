@@ -37,13 +37,13 @@ fun ButtonNavBar (
         )
         NavigationBarItem(
             selected = true,
-            onClick = { onItemSelected(R.id.categories) },
+            onClick = { onItemSelected(R.id.report) },
             icon = {
                 Icon(painter = painterResource(R.drawable.btn_3), contentDescription = null)
                    },
             label = {
                 Text(
-                    text = "Saving Categories",
+                    text = "Report",
                     fontSize = 10.sp
                 )
             },

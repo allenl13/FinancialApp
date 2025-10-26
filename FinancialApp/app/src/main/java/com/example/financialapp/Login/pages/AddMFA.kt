@@ -13,7 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.financialapp.Login.AuthViewModel
 
 @Composable
-fun AddMFA(
+fun AddMFAPage(
     vm: AuthViewModel,
     activity: Activity,
     onDone: () -> Unit

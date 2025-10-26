@@ -8,7 +8,7 @@ val FB_APP_ID      = System.getenv("FIREBASE_APP_ID")       ?: "1:393051596324:a
 val FB_PROJECT_ID  = System.getenv("FIREBASE_PROJECT_ID")   ?: "financiallogin-64260"
 val FB_SENDER_ID   = System.getenv("FIREBASE_SENDER_ID")    ?: "393051596324"
 val FB_BUCKET      = System.getenv("FIREBASE_STORAGE_BUCKET") ?: "financiallogin-64260.firebasestorage.app"
-
+val ALPHA_VANTAGE_KEY_DEFAULT = System.getenv("ALPHA_VANTAGE_KEY")?: "GQ7IP0EF6N68ZSEX"
 val GEMINI_API_KEY_DEFAULT = System.getenv("GEMINI_API_KEY") ?: "AIzaSyD0F9PgEg5w3gOkka-sbanLwc6sMjCq5yo"
 
 plugins {
@@ -45,7 +45,7 @@ android {
             if (f.exists()) load(f.inputStream())
         }
 
-        val alphaKey = props.getProperty("ALPHA_VANTAGE_KEY") ?: ""
+        val alphaKey = props.getProperty("ALPHA_VANTAGE_KEY") ?: ALPHA_VANTAGE_KEY_DEFAULT
         val geminiKey = props.getProperty("GEMINI_API_KEY") ?: GEMINI_API_KEY_DEFAULT
 
         buildConfigField("String", "ALPHA_VANTAGE_KEY", "\"$alphaKey\"")
@@ -175,4 +175,16 @@ dependencies {
     val retrofitVersion = "3.0.0"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
+
+    implementation("androidx.activity:activity-ktx:1.9.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
 }

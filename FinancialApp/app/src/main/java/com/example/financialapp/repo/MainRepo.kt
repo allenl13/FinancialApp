@@ -8,4 +8,5 @@ class MainRepo{
         ExpenseDomain("PB Tech", 4000.00, "cinema", "28 sept 2025 2:06"),
         ExpenseDomain("KFC", 5000.00, "mcdonald", "29 sept 2025 2:06"),
     )
+
 }
