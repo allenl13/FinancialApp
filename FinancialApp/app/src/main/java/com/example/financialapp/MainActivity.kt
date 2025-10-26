@@ -3,6 +3,7 @@ package com.example.financialapp
 // Feature pages (use the correct package names)
 
 
+import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -31,6 +32,7 @@ import com.example.financialapp.Investment.InvestPage
 import com.example.financialapp.Investment.InvestVMFactory
 import com.example.financialapp.Investment.InvestViewModel
 import com.example.financialapp.Login.AuthViewModel
+import com.example.financialapp.Login.pages.AddMFA
 import com.example.financialapp.Login.pages.ForgotPassword
 import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.Login.pages.SignupPage
@@ -170,10 +172,15 @@ class MainActivity : ComponentActivity() {
                                         category = e.title,
                                     )
                                 }
-                                txVm.exportCsv(ctx)
+                                // If exportCsv needs the list, pass `txs` here. Otherwise keep as-is:
+                                txVm.exportCsv(ctx /*, txs */)
+                            },
+                            onAddMfa = {
+                                nav.navigate("addMfa")
                             }
                         )
                     }
+
 
                     //Ai page
                     composable ("chatpage") {
@@ -217,6 +224,17 @@ class MainActivity : ComponentActivity() {
                         onDone = { nav.popBackStack() },
                         vm = walletVm
                     ) }
+
+                    composable("addMfa") {
+                        val authvm: AuthViewModel = viewModel()
+                        val act = (LocalContext.current as? Activity) ?: return@composable
+
+                        AddMFA(
+                            vm = authvm,
+                            activity = act,
+                            onDone = { nav.popBackStack() } // go back after success
+                        )
+                    }
                 }
             }
         }

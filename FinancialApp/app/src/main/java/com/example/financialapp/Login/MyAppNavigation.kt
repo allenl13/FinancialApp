@@ -20,7 +20,7 @@ import com.example.financialapp.Login.pages.LoginPage
 import com.example.financialapp.Login.pages.SignupPage
 import com.example.financialapp.dashboard.MainScreen
 import com.example.financialapp.repo.MainViewModel
-import com.example.financialapp.Login.pages.AddMFAPage
+import com.example.financialapp.Login.pages.AddMFA
 import com.example.financialapp.Login.pages.MFAChallengePage
 
 // login/signup/forgor navigation
@@ -94,7 +94,7 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel)
         //MFA enrollment page (one-time)
         composable("addMfa") {
             val activity = LocalContext.current as Activity
-            AddMFAPage(
+            AddMFA(
                 vm = authViewModel,
                 activity = activity
             ) {
