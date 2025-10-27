@@ -1,8 +1,11 @@
 package com.example.financialapp.dashboard
 
 import android.graphics.drawable.Icon
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -24,9 +27,11 @@ fun ButtonNavBar (
     ){
     NavigationBar (
         containerColor = MaterialTheme.colorScheme.surface,
+        //windowInsets = WindowInsets.navigationBars,
         modifier = modifier
             .fillMaxWidth()
             .height(80.dp)
+            //.navigationBarsPadding()
     ){
         val itemColors = NavigationBarItemDefaults.colors(
             selectedIconColor   = MaterialTheme.colorScheme.onSecondaryContainer,
