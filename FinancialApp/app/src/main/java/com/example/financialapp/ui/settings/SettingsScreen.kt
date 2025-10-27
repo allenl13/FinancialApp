@@ -90,6 +90,26 @@ fun SettingsScreen(
 
         Button(onClick = onExportCsv) { Text("Export Transactions (CSV)") }
 
+        // --- Background section (unchanged layout; panel is scrollable) ---
+        SectionBlock(title = "Background") {
+            val selected by bgVm.selected.collectAsState()
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = { showPicker = true }) { Text("Change Background Image") }
+                OutlinedButton(onClick = { bgVm.reset() }, enabled = (selected != null)) {
+                    Text("Reset to Default")
+                }
+            }
+
+            if (showPicker) {
+                Spacer(Modifier.height(8.dp))
+                BackgroundPickerPanel(
+                    vm = bgVm,
+                    onApply = { showPicker = false },
+                    onCancel = { showPicker = false }
+                )
+            }
+        }
+
         Divider()
 
         // --- Security ---
