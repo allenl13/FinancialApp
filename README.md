@@ -16,7 +16,21 @@ Our app helps manage investments, track subscriptions, set and monitor savings g
 - [Real-Time Transaction Tracking]
 - [Investment Tracking]
 - [Money conversion]
- 
+- [Two-Factor Authentication (2FA)]
+- [SMS login verification (2FA via phone)]
+- [Search bar for goals]
+- [Sort goals]
+- [Show completed goals]
+- [Filter goals by category]
+- [Add new cards]
+- [Edit or delete saved cards]
+- [Monthly summary report screen]
+- [Sort subscriptions]
+- [Search subscriptions]
+- [Total subscription cost tracking]
+- [Subscription mark as paid]
+- [Custom background image]
+- [Profile photo upload/change]
 ---
 
 ## Steps When You First Launch the App
@@ -29,3 +43,12 @@ Our app helps manage investments, track subscriptions, set and monitor savings g
 
 
  *Tip: If you ever get stuck on any page in the app, simply press your phone’s back button to return to the previous screen.*  
+
+ For adding MFA, use this test phone number and this code
+ +642102764563 |	333333
+
+
+
+
+
+67
