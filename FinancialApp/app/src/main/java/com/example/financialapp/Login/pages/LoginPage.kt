@@ -32,11 +32,16 @@ fun LoginPage(
     var password by remember { mutableStateOf("") }
 
     val authState = authViewModel.authState.observeAsState()
+    val mfaState  = authViewModel.mfaState.observeAsState("")   // ▶ observe MFA state
     val context = LocalContext.current
 
+    // Navigate to main on normal auth success / show errors
     LaunchedEffect(authState.value) {
         when (authState.value) {
-            is AuthState.Authenticated -> navController.navigate("main")
+            is AuthState.Authenticated -> navController.navigate("main") {
+                popUpTo("login") { inclusive = true }
+                launchSingleTop = true
+            }
             is AuthState.Error -> Toast.makeText(
                 context,
                 (authState.value as AuthState.Error).message,
@@ -46,7 +51,12 @@ fun LoginPage(
         }
     }
 
-    //email
+    // ▶ If password step succeeds but MFA is required, go to MFA screen
+    LaunchedEffect(mfaState.value) {
+        if (mfaState.value == "MFA_REQUIRED") {
+            navController.navigate("mfa") { launchSingleTop = true }
+        }
+    }
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -54,48 +64,40 @@ fun LoginPage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Login", fontSize = 32.sp)
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text(text = "Email") }
+            label = { Text("Email") }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
 
-        //password
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text(text = "Password") },
+            label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
+        val isLoading = authState.value is AuthState.Loading
         Button(
             onClick = { authViewModel.login(email, password) },
-            enabled = authState.value != AuthState.Loading
+            enabled = !isLoading && email.isNotBlank() && password.isNotBlank()
         ) {
-            Text(text = "Login")
+            Text(if (isLoading) "Logging in..." else "Login")
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        // ▶ (optional) tiny debug helper while testing
+        // if (mfaState.value.isNotBlank()) Text("mfaState=${mfaState.value}", fontSize = 12.sp)
 
-        TextButton(
-            onClick = { navController.navigate("forgot") }
-        ) {
-            Text("Forgot password?")
-        }
+        Spacer(Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextButton(
-            onClick = { navController.navigate("signup") }
-        ) {
-            Text("Create an account")
-        }
+        TextButton(onClick = { navController.navigate("forgot") }) { Text("Forgot password?") }
+        Spacer(Modifier.height(8.dp))
+        TextButton(onClick = { navController.navigate("signup") }) { Text("Create an account") }
     }
 }

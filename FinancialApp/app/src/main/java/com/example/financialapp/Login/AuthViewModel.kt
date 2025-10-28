@@ -65,13 +65,14 @@ class AuthViewModel : ViewModel() {
                 } else {
                     val ex = task.exception
                     if (ex is FirebaseAuthMultiFactorException) {
-                        ///mfa challenge
+                        // save resolver and move to mfa screen
                         mfaResolver = ex.resolver
                         _mfaState.value = "MFA_REQUIRED"
+                        _authState.value = AuthState.Unauthenticated   // reenable the login ui
                     } else {
-                        _authState.value =
-                            AuthState.Error(ex?.message ?: "Something went wrong")
+                        _authState.value = AuthState.Error(ex?.message ?: "Something went wrong")
                     }
+
                 }
             }
     }
@@ -219,44 +220,39 @@ class AuthViewModel : ViewModel() {
             return
         }
 
-        val phoneInfo = resolver.hints.firstOrNull() as? PhoneMultiFactorInfo ?: run {
+        val phoneInfo = resolver.hints
+            .filterIsInstance<PhoneMultiFactorInfo>()
+            .firstOrNull() ?: run {
             _mfaState.value = "MFA_ERROR: No phone factor"
             return
         }
 
-        // Start SMS verification for this user's enrolled phone factor
         _mfaState.value = "MFA_SENDING_CODE"
 
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(cred: PhoneAuthCredential) {
-                // Auto verification path
                 finishMfaSignIn(cred)
             }
-
             override fun onVerificationFailed(e: FirebaseException) {
                 _mfaState.value = "MFA_ERROR: ${e.message}"
             }
-
-            override fun onCodeSent(
-                vid: String,
-                token: PhoneAuthProvider.ForceResendingToken
-            ) {
+            override fun onCodeSent(vid: String, token: PhoneAuthProvider.ForceResendingToken) {
                 verificationId = vid
                 _mfaState.value = "MFA_CODE_SENT"
             }
         }
 
-        // Newer Firebase SDKs don’t use setPhoneMultiFactorInfo() — use this static helper
-        PhoneAuthProvider.verifyPhoneNumber(
-            PhoneAuthOptions.newBuilder()
-                .setActivity(activity)
-                .setMultiFactorSession(resolver.session)
-                .setPhoneNumber(phoneInfo.phoneNumber!!)
-                .setTimeout(60L, TimeUnit.SECONDS)
-                .setCallbacks(callbacks)
-                .build()
-        )
+        val options = PhoneAuthOptions.newBuilder(FirebaseAuth.getInstance())
+            .setActivity(activity)
+            .setMultiFactorSession(resolver.session)
+            .setMultiFactorHint(phoneInfo)   //for mfa
+            .setTimeout(60L, TimeUnit.SECONDS)
+            .setCallbacks(callbacks)
+            .build()
+
+        PhoneAuthProvider.verifyPhoneNumber(options)
     }
+
     // verify mfa code
     fun verifyMfaCode(code: String) {
         val vid = verificationId ?: run {
@@ -267,7 +263,7 @@ class AuthViewModel : ViewModel() {
         finishMfaSignIn(cred)
     }
 
-    // ✅ Finish the MFA sign-in using the built credential
+    //finishes MFA sign in
     private fun finishMfaSignIn(cred: PhoneAuthCredential) {
         val resolver = mfaResolver ?: run {
             _mfaState.value = "MFA_ERROR: No resolver"

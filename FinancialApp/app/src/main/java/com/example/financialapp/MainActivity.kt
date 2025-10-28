@@ -53,6 +53,7 @@ import com.example.financialapp.wallet.WalletHome
 import com.example.financialapp.wallet.WalletListViewModel
 import android.content.Context
 import androidx.compose.runtime.*
+import com.example.financialapp.Login.pages.MFAChallengePage
 
 class MainActivity : ComponentActivity() {
 
@@ -188,28 +189,50 @@ private fun MainApp(
 
                     // ------ Auth flow ------
                     composable("login") {
-                        val authvm: AuthViewModel = viewModel()
                         LoginPage(
                             navController = navController,
-                            authViewModel = authvm
+                            authViewModel = authViewModel   // <- use shared
                         )
                     }
                     composable("signup") {
-                        val authvm: AuthViewModel = viewModel()
                         SignupPage(
                             navController = navController,
-                            authViewModel = authvm
+                            authViewModel = authViewModel   // <- use shared
                         )
                     }
                     composable("forgot") {
-                        val authvm: AuthViewModel = viewModel()
                         ForgotPassword(
-                            vm = authvm,
+                            vm = authViewModel,             // <- use shared
                             onBackToLogin = { navController.popBackStack("login", inclusive = false) }
                         )
                     }
+                    composable("mfa") {
+                        val act = (LocalContext.current as? Activity) ?: return@composable
+                        MFAChallengePage(
+                            vm = authViewModel,   // shared VM (has mfaResolver)
+                            activity = act,
+                            onSuccess = {
+                                navController.navigate("main") {
+                                    popUpTo("login") { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            }
+                        )
+                    }
+                    composable("addMfa") {
+                        val act = (LocalContext.current as? Activity) ?: return@composable
+                        AddMFAPage(
+                            vm = authViewModel,        // use the shared VM
+                            activity = act,
+                            onDone = { navController.popBackStack() } // back to settings after ENROLL_SUCCESS
+                        )
+                    }
 
-                    composable("report"){
+
+
+
+
+            composable("report"){
                         ReportScreen()
                     }
 
@@ -218,17 +241,6 @@ private fun MainApp(
                         WalletHome(
                             navController,
                             expenses = viewModel<MainViewModel>().loadData(),
-                        )
-                    }
-
-                    composable("addMfa") {
-                        val authvm: AuthViewModel = viewModel()
-                        val act = (LocalContext.current as? Activity) ?: return@composable
-
-                        AddMFAPage(
-                            vm = authvm,
-                            activity = act,
-                            onDone = { navController.popBackStack() } // go back after success
                         )
                     }
                     // Add/Edit Cards
