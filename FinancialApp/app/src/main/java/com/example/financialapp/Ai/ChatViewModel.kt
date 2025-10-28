@@ -17,7 +17,8 @@ class ChatViewModel : ViewModel() {
     val generativeModel = GenerativeModel(
         modelName = "gemini-2.5-flash",
         apiKey = BuildConfig.GEMINI_API_KEY,
-        systemInstruction = content {
+        systemInstruction = content
+        {
             text("""
 You are **Financial-AI**, a friendly in-app assistant for a personal finance Android app built with Jetpack Compose. 
 Your job is to help the user use the app’s existing features, explain concepts simply, and give brief, practical tips.
