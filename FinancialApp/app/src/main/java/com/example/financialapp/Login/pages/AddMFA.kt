@@ -18,7 +18,7 @@ fun AddMFAPage(
     activity: Activity,
     onDone: () -> Unit
 ) {
-    var phone by remember { mutableStateOf("+64") } // or your default region
+    var phone by remember { mutableStateOf("+64") } // nz region by default
     var code by remember { mutableStateOf("") }
     val mfaState by vm.mfaState.observeAsState("")
 
