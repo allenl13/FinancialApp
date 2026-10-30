@@ -109,3 +109,9 @@ For a manual review, check goal creation and contribution updates, subscription 
 ## Team project
 
 FinancialApp was developed collaboratively as an SDP team project. The features described here reflect the shared work of the team.
+
+### Allen Liao's contribution
+
+- Implemented savings goal creation, editing and progress tracking, named and colour-coded savings categories, and goal-completion and deadline notifications.
+- Added goal-name search, sorting by due date, remaining amount and category, category filtering, and a completed-goals view.
+- Served as Scrum Master, coordinated sprint tasks and progress tracking, maintained the burndown chart, and drafted review and presentation scripts.
